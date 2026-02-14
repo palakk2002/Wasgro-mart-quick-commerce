@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import aadekhLogo from "@assets/aadekh1.png";
+import WasgroMartLogo from "@assets/wasgromart-logo-v2.png";
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
@@ -90,13 +90,13 @@ export default function AdminHeader({
               </svg>
             )}
           </button>
-          {/* Aadekh Logo */}
+          {/* Wasgro mart Logo */}
           <button
             onClick={handleLogoClick}
             className="hover:opacity-80 transition-opacity">
             <img
-              src={aadekhLogo}
-              alt="Aadekh"
+              src={WasgroMartLogo}
+              alt="Wasgro mart"
               className="h-24 sm:h-28 w-auto object-contain cursor-pointer -my-6 sm:-my-8 relative z-50"
               style={{ maxWidth: "none" }}
             />

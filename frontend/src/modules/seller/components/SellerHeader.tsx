@@ -105,13 +105,13 @@ export default function SellerHeader({
               </svg>
             )}
           </button>
-          {/* Aadekh Logo */}
+          {/* Wasgro mart Logo */}
           <button
             onClick={handleLogoClick}
             className="hover:opacity-80 transition-opacity">
             <img
-              src="/assets/aadekh_logo-removebg-preview.png"
-              alt="Aadekh"
+              src="/assets/wasgromart-logo-v2.png"
+              alt="Wasgro mart"
               className="h-24 sm:h-28 w-auto object-contain cursor-pointer -my-6 sm:-my-8 relative z-50"
               style={{ maxWidth: "none" }}
             />

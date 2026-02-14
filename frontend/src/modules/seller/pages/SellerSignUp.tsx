@@ -50,10 +50,41 @@ export default function SellerSignUp() {
       try {
         const res = await getHeaderCategoriesPublic();
         if (Array.isArray(res)) {
-          setCategories(res.filter((cat) => cat.status === "Published"));
+          const published = res.filter((cat) => cat.status === "Published");
+
+          // Ensure Medicines/Pharmacy is available
+          const hasMedicines = published.some(
+            (cat) =>
+              cat.name.toLowerCase() === "medicines" ||
+              cat.name.toLowerCase() === "pharmacy"
+          );
+
+          if (!hasMedicines) {
+            published.push({
+              _id: "medicine-manual-id",
+              name: "Medicines",
+              slug: "medicine",
+              status: "Published",
+              iconName: "medicine",
+              iconLibrary: "lucide",
+            } as any);
+          }
+
+          setCategories(published);
         }
       } catch (err) {
         console.error("Error fetching categories:", err);
+        // Fallback if API fails
+        setCategories([
+          {
+            _id: "medicine-manual-id",
+            name: "Medicines",
+            slug: "medicine",
+            status: "Published",
+            iconName: "medicine",
+            iconLibrary: "lucide",
+          } as any,
+        ]);
       }
     };
     fetchCats();
@@ -265,8 +296,8 @@ export default function SellerSignUp() {
             <div className="relative mb-2 group">
               <div className="absolute inset-0 bg-white/20 rounded-full blur-xl transform group-hover:scale-110 transition-transform duration-500" />
               <img
-                src="/assets/aadekh_logo-removebg-preview.png"
-                alt="Aadekh"
+                src="/assets/wasgromart-logo-v2.png"
+                alt="Wasgro mart"
                 className="h-40 w-auto object-contain relative z-10 drop-shadow-lg transform hover:scale-105 transition-transform duration-300"
               />
             </div>
@@ -761,7 +792,7 @@ export default function SellerSignUp() {
         {/* Footer */}
         <div className="px-6 py-3 bg-black/20 border-t border-white/10 text-center backdrop-blur-md">
           <p className="text-[9px] text-white/50">
-            By continuing, you agree to Aadekh's Terms of Service and Privacy Policy
+            By continuing, you agree to Wasgro mart's Terms of Service and Privacy Policy
           </p>
         </div>
       </div>
