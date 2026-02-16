@@ -21,9 +21,12 @@ export default function PharmaStore() {
       try {
         setLoading(true);
         const response = await getProducts({ category: 'health-pharma' });
-        setProducts(response.data as unknown as Product[]);
+        // Ensure we always have an array
+        const items = Array.isArray(response.data) ? response.data : [];
+        setProducts(items as unknown as Product[]);
       } catch (error) {
         console.error('Failed to fetch pharma products:', error);
+        setProducts([]);
       } finally {
         setLoading(false);
       }

@@ -814,16 +814,8 @@ function AppContent() {
                                     element={<Addresses />}
                                   />
                                   <Route
-                                    path="/store/:slug"
-                                    element={<StorePage />}
-                                  />
-                                  <Route
                                     path="/store/spiritual"
                                     element={<SpiritualStore />}
-                                  />
-                                  <Route
-                                    path="/store/pharma"
-                                    element={<PharmaStore />}
                                   />
                                   <Route
                                     path="/store/e-gifts"
@@ -848,6 +840,10 @@ function AppContent() {
                                   <Route
                                     path="/store/hobby"
                                     element={<HobbyStore />}
+                                  />
+                                  <Route
+                                    path="/store/:slug"
+                                    element={<StorePage />}
                                   />
                                 </Routes>
                               </Suspense>

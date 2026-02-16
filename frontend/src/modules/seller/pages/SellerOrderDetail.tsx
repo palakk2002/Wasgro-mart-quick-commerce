@@ -33,8 +33,8 @@ export default function SellerOrderDetail() {
       } catch (err: any) {
         setError(
           err.response?.data?.message ||
-            err.message ||
-            "Failed to fetch order details"
+          err.message ||
+          "Failed to fetch order details"
         );
       } finally {
         setLoading(false);
@@ -232,22 +232,16 @@ export default function SellerOrderDetail() {
     doc.rect(margin, yPos, contentWidth, 10, "F");
 
     const colWidths = [
-      contentWidth * 0.08, // Sr. No.
-      contentWidth * 0.4, // Product
-      contentWidth * 0.15, // Price
-      contentWidth * 0.15, // Tax
-      contentWidth * 0.1, // Qty
-      contentWidth * 0.12, // Subtotal
+      contentWidth * 0.1, // Sr. No.
+      contentWidth * 0.7, // Product
+      contentWidth * 0.2, // Qty
     ];
 
     let xPos = margin;
     const headers = [
       "Sr. No.",
       "Product",
-      "Price",
-      "Tax ₹ (%)",
       "Qty",
-      "Subtotal",
     ];
 
     doc.setFontSize(8);
@@ -273,10 +267,7 @@ export default function SellerOrderDetail() {
       const rowData = [
         item.srNo.toString(),
         item.product,
-        `₹${item.price.toFixed(2)}`,
-        `${item.tax.toFixed(2)} (${item.taxPercent.toFixed(2)}%)`,
         item.qty.toString(),
-        `₹${item.subtotal.toFixed(2)}`,
       ];
 
       rowData.forEach((data, index) => {
@@ -301,43 +292,8 @@ export default function SellerOrderDetail() {
       yPos += 10;
     });
 
-    // Calculate totals
-    const totalSubtotal = orderDetail.items.reduce(
-      (sum, item) => sum + item.subtotal,
-      0
-    );
-    const totalTax = orderDetail.items.reduce((sum, item) => sum + item.tax, 0);
-    const grandTotal = totalSubtotal + totalTax;
-
     yPos += 5;
-    checkPageBreak(30);
-
-    // Totals Section
-    doc.setDrawColor(200, 200, 200);
-    doc.line(margin, yPos, pageWidth - margin, yPos);
-    yPos += 8;
-
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text("Subtotal:", pageWidth - margin - 60, yPos, { align: "right" });
-    doc.text(`₹${totalSubtotal.toFixed(2)}`, pageWidth - margin, yPos, {
-      align: "right",
-    });
-    yPos += 7;
-
-    doc.text("Tax:", pageWidth - margin - 60, yPos, { align: "right" });
-    doc.text(`₹${totalTax.toFixed(2)}`, pageWidth - margin, yPos, {
-      align: "right",
-    });
-    yPos += 7;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(12);
-    doc.text("Grand Total:", pageWidth - margin - 60, yPos, { align: "right" });
-    doc.text(`₹${grandTotal.toFixed(2)}`, pageWidth - margin, yPos, {
-      align: "right",
-    });
-    yPos += 15;
+    checkPageBreak(10);
 
     // Footer
     checkPageBreak(20);
@@ -582,7 +538,7 @@ export default function SellerOrderDetail() {
 
           {/* Product Table */}
           <div className="overflow-x-auto mb-6">
-            <table className="w-full min-w-[800px]">
+            <table className="w-full min-w-[500px]">
               <thead className="bg-neutral-50 border-b border-neutral-200">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
@@ -595,16 +551,7 @@ export default function SellerOrderDetail() {
                     Unit
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                    Price
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                    Tax ₹ (%)
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
                     Qty
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-neutral-700 uppercase tracking-wider">
-                    Subtotal
                   </th>
                 </tr>
               </thead>
@@ -621,16 +568,7 @@ export default function SellerOrderDetail() {
                       {formatUnit(item.unit, item.qty)}
                     </td>
                     <td className="px-4 py-3 text-sm text-neutral-900">
-                      ₹{item.price.toFixed(2)}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-neutral-600">
-                      {item.tax.toFixed(2)} ({item.taxPercent.toFixed(2)}%)
-                    </td>
-                    <td className="px-4 py-3 text-sm text-neutral-900">
                       {item.qty}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-neutral-900 font-medium">
-                      ₹{item.subtotal.toFixed(2)}
                     </td>
                   </tr>
                 ))}

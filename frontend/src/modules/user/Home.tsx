@@ -42,7 +42,6 @@ export default function Home() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        startRouteLoading();
         setLoading(true);
         setError(null);
         const response = await getHomeContent(
@@ -64,7 +63,6 @@ export default function Home() {
         setError("Network error. Please check your connection.");
       } finally {
         setLoading(false);
-        stopRouteLoading();
       }
     };
 

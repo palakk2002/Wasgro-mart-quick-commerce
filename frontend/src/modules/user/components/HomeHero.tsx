@@ -68,33 +68,10 @@ export default function HomeHero({
             icon: getIconByName(c.iconName),
           }));
 
-          // Add Medicines tab if not already present in the fetched categories
-          const hasMedicines = mapped.some(
-            (tab) =>
-              tab.label.toLowerCase() === "medicines" ||
-              tab.id === "medicine" ||
-              tab.id === "pharma",
-          );
-
-          if (!hasMedicines) {
-            mapped.unshift({
-              id: "medicine",
-              label: "Medicines",
-              icon: getIconByName("medicine"),
-            });
-          }
-
           setTabs([ALL_TAB, ...mapped]);
         } else {
           // Fallback if no categories are fetched
-          setTabs([
-            ALL_TAB,
-            {
-              id: "medicine",
-              label: "Medicines",
-              icon: getIconByName("medicine"),
-            },
-          ]);
+          setTabs([ALL_TAB]);
         }
       } catch (error) {
         console.error("Failed to fetch header categories", error);

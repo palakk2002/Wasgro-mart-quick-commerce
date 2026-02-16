@@ -4,14 +4,9 @@ import { getOrderDetails, updateOrderStatus, getSellerLocationsForOrder, sendDel
 import deliveryIcon from '@assets/deliveryboy/deliveryIcon.png';
 import GoogleMapsTracking from '../../../components/GoogleMapsTracking';
 
-// Helper to get delivery icon URL (works in both dev and production)
+// Helper to get delivery icon URL
 const getDeliveryIconUrl = () => {
-    // Try imported path first (Vite will process this in production)
-    if (deliveryIcon && typeof deliveryIcon === 'string') {
-        return deliveryIcon;
-    }
-    // Fallback to public path
-    return '/assets/deliveryboy/deliveryIcon.png';
+    return deliveryIcon;
 };
 
 // Icons components to avoid external dependency issues
@@ -816,13 +811,18 @@ export default function DeliveryOrderDetail() {
                                     <span className="w-6 h-6 rounded bg-neutral-100 flex items-center justify-center text-xs font-bold text-neutral-600">{item.quantity}x</span>
                                     <span className="text-sm text-neutral-700 font-medium">{item.name}</span>
                                 </div>
-                                <span className="text-sm font-semibold text-neutral-900">₹{item.price * item.quantity}</span>
+                                {/* Hide individual item prices for delivery boy */}
+                                {/* <span className="text-sm font-semibold text-neutral-900">₹{item.price * item.quantity}</span> */}
                             </div>
                         ))}
                     </div>
                     <div className="mt-4 pt-4 border-t border-dashed border-neutral-200 flex justify-between items-center">
-                        <span className="font-semibold text-neutral-700">Total Amount</span>
-                        <span className="text-xl font-bold text-neutral-900">₹{order.totalAmount}</span>
+                        <span className="font-semibold text-neutral-700">
+                            {order.paymentMethod === 'COD' ? 'Cash to Collect' : 'Payment Status'}
+                        </span>
+                        <span className={`text-xl font-bold ${order.paymentMethod === 'COD' ? 'text-neutral-900' : 'text-green-600'}`}>
+                            {order.paymentMethod === 'COD' ? `₹${order.totalAmount}` : 'Prepaid'}
+                        </span>
                     </div>
                 </div>
 
