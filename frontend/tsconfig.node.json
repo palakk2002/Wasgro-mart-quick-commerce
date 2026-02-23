@@ -6,6 +6,9 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true
   },
-  "include": ["vite.config.ts", "vite-plugin-serve-assets.ts"]
+  "include": [
+    "vite.config.ts",
+    "vite-plugin-serve-assets.ts",
+    "check_dimensions.ts"
+  ]
 }
-

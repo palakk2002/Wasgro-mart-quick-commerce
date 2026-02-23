@@ -170,8 +170,8 @@ export default function PromoStrip({ activeTab = "all" }: PromoStripProps) {
                     id: card._id || card.categoryId?._id || card.categoryId,
                     badge: card.badge || `Up to ${card.discountPercentage || 0}% OFF`,
                     title: card.title || category?.name || "",
-                    categoryId: category?._id || card.categoryId, // Use _id for fetching subcategories
-                    slug: category?.slug || card.categoryId, // Use slug for navigation
+                    categoryId: category?._id || (typeof card.categoryId === 'string' && card.categoryId.match(/^[0-9a-fA-F]{24}$/) ? card.categoryId : null), // Ensure it's an ID
+                    slug: category?.slug || (typeof card.categoryId === 'string' ? card.categoryId : undefined),
                     imageUrl: category?.image,
                     bgColor: "bg-yellow-50",
                   };
@@ -229,7 +229,8 @@ export default function PromoStrip({ activeTab = "all" }: PromoStripProps) {
                 id: c._id || c.id,
                 badge: "Up to 50% OFF",
                 title: c.name,
-                categoryId: c.slug || c._id,
+                categoryId: c._id || c.id, // Use ID for API calls
+                slug: c.slug, // Use slug for navigation
                 bgColor: c.color || "bg-yellow-50",
               }));
           }

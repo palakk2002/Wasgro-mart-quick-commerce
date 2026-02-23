@@ -174,38 +174,7 @@ export default function Home() {
       <PromoStrip activeTab={activeTab} />
 
       {/* Static Banners Carousel */}
-      <HomeBannerCarousel
-        banners={[
-          {
-            _id: "1",
-            title: "Banner 1",
-            image: "/assets/banners/banner1.jpg",
-            link: "/category/all",
-            order: 1,
-          },
-          {
-            _id: "2",
-            title: "Banner 2",
-            image: "/assets/banners/banner2.jpg",
-            link: "/category/all",
-            order: 2,
-          },
-          {
-            _id: "3",
-            title: "Banner 3",
-            image: "/assets/banners/banner3.jpg",
-            link: "/category/all",
-            order: 3,
-          },
-          {
-            _id: "4",
-            title: "Banner 4",
-            image: "/assets/banners/banner4.jpg",
-            link: "/category/all",
-            order: 4,
-          },
-        ]}
-      />
+      <HomeBannerCarousel banners={homeData.promoBanners} />
 
       {/* LOWEST PRICES EVER Section */}
       <LowestPricesEver

@@ -90,7 +90,7 @@ export default function SellerAddProduct() {
     isShopByStoreOnly: "No",
     shopId: "",
     mainImageUrl: "",
-    galleryImageUrls: [],
+    galleryImageUrls: [] as string[],
   });
 
   useEffect(() => {
@@ -222,6 +222,8 @@ export default function SellerAddProduct() {
                 : "No",
               shopId:
                 (product as any).shopId?._id || (product as any).shopId || "",
+              hsnCode: product.hsnCode || "",
+              description: product.description || "",
             });
             setVariations(product.variations);
             if (product.mainImageUrl || product.mainImage) {
@@ -567,6 +569,8 @@ export default function SellerAddProduct() {
               galleryImageUrls: [],
               isShopByStoreOnly: "No",
               shopId: "",
+              hsnCode: "",
+              description: "",
             });
             setVariations([]);
             setMainImageFile(null);

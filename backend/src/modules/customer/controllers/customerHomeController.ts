@@ -641,16 +641,22 @@ export const getHomeContent = async (req: Request, res: Response) => {
             ? banners
             : [
               {
-                id: 1,
+                _id: "1",
+                id: "1",
+                title: "Grocery Sale",
                 image:
                   "https://img.freepik.com/free-vector/horizontal-banner-template-grocery-sales_23-2149432421.jpg",
                 link: "/category/grocery",
+                order: 1,
               },
               {
-                id: 2,
+                _id: "2",
+                id: "2",
+                title: "Supermarket Offers",
                 image:
                   "https://img.freepik.com/free-vector/flat-supermarket-social-media-cover-template_23-2149363385.jpg",
                 link: "/category/snacks",
+                order: 2,
               },
             ],
         trending,

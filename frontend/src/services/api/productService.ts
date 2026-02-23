@@ -49,6 +49,8 @@ export interface Product {
   maxReturnDays?: number;
   totalAllowedQuantity: number;
   fssaiLicNo?: string;
+  hsnCode?: string;
+  description?: string;
   mainImageUrl?: string;
   mainImage?: string; // Mapped directly from Product model
   galleryImageUrls: string[];
@@ -90,6 +92,8 @@ export interface CreateProductData {
   maxReturnDays?: number;
   totalAllowedQuantity: number;
   fssaiLicNo?: string;
+  hsnCode?: string;
+  description?: string;
   mainImageUrl?: string;
   galleryImageUrls?: string[];
   variations: ProductVariation[];
@@ -105,7 +109,7 @@ export interface Shop {
   image?: string;
 }
 
-export interface UpdateProductData extends Partial<CreateProductData> {}
+export interface UpdateProductData extends Partial<CreateProductData> { }
 
 export interface GetProductsParams {
   search?: string;

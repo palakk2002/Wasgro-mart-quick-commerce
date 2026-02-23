@@ -1,5 +1,6 @@
-import fs from 'fs';
-import path from 'path';
+/// <reference types="node" />
+import fs from 'node:fs';
+import path from 'node:path';
 
 function getImageDimensions(filePath: string) {
     try {
@@ -20,7 +21,7 @@ function getImageDimensions(filePath: string) {
 }
 
 const bannersDir = path.join(process.cwd(), 'public', 'assets', 'banners');
-const files = ['banner1.jpg', 'banner2.jpg', 'banner3.jpg', 'banner4.jpg'];
+const files = ['banner1.jpg', 'banner3.jpg', 'banner4.jpg'];
 
 console.log('Checking banner dimensions...');
 files.forEach(file => {
