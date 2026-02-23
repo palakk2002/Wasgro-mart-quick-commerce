@@ -106,7 +106,7 @@ export default function SellerReturnRequest() {
             <div className="flex-1 p-4 sm:p-6">
                 <div className="bg-white rounded-lg shadow-sm border border-neutral-200 flex flex-col">
                     {/* Section Header - Green Banner */}
-                    <div className="bg-green-600 text-white px-4 sm:px-6 py-3 rounded-t-lg">
+                    <div className="bg-teal-700 text-white px-4 sm:px-6 py-3 rounded-t-lg">
                         <h2 className="text-lg sm:text-xl font-semibold">View Return Request</h2>
                     </div>
 
@@ -215,7 +215,7 @@ export default function SellerReturnRequest() {
                                             link.click();
                                             document.body.removeChild(link);
                                         }}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1 transition-colors"
+                                className="bg-teal-700 hover:bg-teal-800 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center gap-1 transition-colors"
                             >
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -372,7 +372,7 @@ export default function SellerReturnRequest() {
                                                     onClick={() => {
                                                         alert(`Return Request Details:\n\nOrder Item ID: ${request.orderItemId}\nProduct: ${request.product}\nVariant: ${request.variant}\nPrice: ₹${request.price.toFixed(2)}\nDiscounted Price: ₹${request.discPrice.toFixed(2)}\nQuantity: ${request.quantity}\nTotal: ₹${request.total.toFixed(2)}\nStatus: ${request.status}\nDate: ${request.date}`);
                                                     }}
-                                                    className="text-green-600 hover:text-green-700 text-xs font-medium transition-colors"
+                                                    className="text-teal-700 hover:text-teal-800 text-xs font-medium transition-colors"
                                                 >
                                                     View
                                                 </button>
@@ -418,7 +418,7 @@ export default function SellerReturnRequest() {
             <footer className="px-4 sm:px-6 py-4 text-center bg-white border-t border-neutral-200">
                 <p className="text-xs sm:text-sm text-neutral-600">
                     Copyright © 2025. Developed By{' '}
-                    <span className="font-semibold text-teal-600">Wasgro mart - 10 Minute App</span>
+                    <span className="font-semibold text-teal-700">Wasgro mart - 10 Minute App</span>
                 </p>
             </footer>
         </div>

@@ -98,13 +98,13 @@ export default function SellerWallet() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="m-4 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg"
+        className="m-4 bg-gradient-to-r from-teal-700 to-teal-800 rounded-2xl p-6 text-white shadow-lg"
       >
         <p className="text-sm opacity-90 mb-1">Wallet Balance</p>
         <h1 className="text-4xl font-bold mb-4">₹{balance.toFixed(2)}</h1>
         <button
           onClick={() => setShowWithdrawModal(true)}
-          className="bg-white text-blue-600 px-6 py-2.5 rounded-lg font-semibold hover:bg-blue-50 transition-all shadow-md"
+          className="bg-white text-teal-700 px-6 py-2.5 rounded-lg font-semibold hover:bg-teal-50 transition-all shadow-md"
         >
           Request Withdrawal
         </button>
@@ -220,7 +220,7 @@ export default function SellerWallet() {
                         className={`px-2 py-1 rounded-full text-xs font-semibold ${withdrawal.status === 'Completed'
                           ? 'bg-green-100 text-green-700'
                           : withdrawal.status === 'Approved'
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-teal-100 text-teal-700'
                             : withdrawal.status === 'Rejected'
                               ? 'bg-red-100 text-red-700'
                               : 'bg-yellow-100 text-yellow-700'
@@ -322,7 +322,7 @@ export default function SellerWallet() {
                 </button>
                 <button
                   onClick={handleWithdrawRequest}
-                  className="flex-1 bg-blue-600 text-white rounded-lg py-2.5 font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+                  className="flex-1 bg-teal-700 text-white rounded-lg py-2.5 font-semibold hover:bg-teal-800 transition disabled:opacity-50"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Submitting...' : 'Submit Request'}

@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import WasgroMartLogo from "@assets/wasgromart-logo-v2.png";
 
 interface AdminHeaderProps {
   onMenuClick: () => void;
@@ -95,9 +94,9 @@ export default function AdminHeader({
             onClick={handleLogoClick}
             className="hover:opacity-80 transition-opacity">
             <img
-              src={WasgroMartLogo}
+              src="/assets/wasgromartfinal-removebg-preview.png"
               alt="Wasgro mart"
-              className="h-24 sm:h-28 w-auto object-contain cursor-pointer -my-6 sm:-my-8 relative z-50"
+              className="h-8 sm:h-16 w-auto object-contain cursor-pointer my-0 sm:-my-2 relative z-50"
               style={{ maxWidth: "none" }}
             />
           </button>

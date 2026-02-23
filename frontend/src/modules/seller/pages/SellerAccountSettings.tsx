@@ -150,7 +150,7 @@ const SellerAccountSettings = () => {
   if (loading && !sellerData.sellerName) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-neutral-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-700"></div>
       </div>
     );
   }
@@ -210,7 +210,7 @@ const SellerAccountSettings = () => {
               onClick={() => setIsEditing(!isEditing)}
               className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 shadow-sm flex items-center gap-2 ${isEditing
                 ? 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
-                : 'bg-teal-600 text-white hover:bg-teal-700 hover:shadow-md'
+                : 'bg-teal-700 text-white hover:bg-teal-800 hover:shadow-md'
                 }`}
             >
               {isEditing ? (
@@ -243,7 +243,7 @@ const SellerAccountSettings = () => {
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                     }`}
                 >
-                  <span className={`${activeTab === tab.id ? 'text-teal-600' : 'text-gray-400'}`}>
+                  <span className={`${activeTab === tab.id ? 'text-teal-700' : 'text-gray-400'}`}>
                     {tab.icon}
                   </span>
                   {tab.label}
@@ -301,7 +301,7 @@ const SellerAccountSettings = () => {
                       <div className="space-y-8">
                         <div className="flex flex-col sm:flex-row items-center gap-6 pb-8 border-b border-gray-100">
                           <div className="relative group">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-500 to-emerald-500 rounded-full blur opacity-25 group-hover:opacity-40 transition-opacity"></div>
+                            <div className="absolute inset-0 bg-gradient-to-tr from-teal-700 to-emerald-500 rounded-full blur opacity-25 group-hover:opacity-40 transition-opacity"></div>
                             <img
                               src={sellerData.profile || 'https://placehold.co/150'}
                               alt="Profile"
@@ -336,7 +336,7 @@ const SellerAccountSettings = () => {
                                 autoComplete="new-password"
                                 placeholder="••••••••"
                                 disabled={!isEditing}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all placeholder:text-gray-300"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all placeholder:text-gray-300"
                               />
                             </div>
                             {isEditing && <p className="text-xs text-gray-400 ml-1">Leave blank to keep current password</p>}
@@ -383,7 +383,7 @@ const SellerAccountSettings = () => {
                                 value={sellerData.category}
                                 onChange={handleInputChange}
                                 disabled={!isEditing}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all appearance-none bg-white"
+                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all appearance-none bg-white"
                               >
                                 <option value="">Select Category</option>
                                 {categories.map(cat => (
@@ -418,25 +418,25 @@ const SellerAccountSettings = () => {
                                   disabled={!isEditing}
                                   required
                                 />
-                                  <div className="mt-4 animate-fadeIn">
-                                    <p className="text-sm font-medium text-neutral-700 mb-2">
-                                      Exact Location <span className="text-teal-600 text-xs font-normal">(Move the map to place the pin on your store's entrance)</span>
-                                    </p>
-                                    <LocationPickerMap
-                                      initialLat={parseFloat(sellerData.latitude) || 26.9124}
-                                      initialLng={parseFloat(sellerData.longitude) || 75.7873}
-                                      onLocationSelect={(lat, lng) => {
-                                        setSellerData(prev => ({
-                                          ...prev,
-                                          latitude: lat.toString(),
-                                          longitude: lng.toString()
-                                        }));
-                                      }}
-                                    />
-                                    <p className="mt-1 text-xs text-neutral-500 text-center">
-                                      Selected Coordinates: {sellerData.latitude || 'Not selected'}, {sellerData.longitude || 'Not selected'}
-                                    </p>
-                                  </div>
+                                <div className="mt-4 animate-fadeIn">
+                                  <p className="text-sm font-medium text-neutral-700 mb-2">
+                                    Exact Location <span className="text-teal-700 text-xs font-normal">(Move the map to place the pin on your store's entrance)</span>
+                                  </p>
+                                  <LocationPickerMap
+                                    initialLat={parseFloat(sellerData.latitude) || 26.9124}
+                                    initialLng={parseFloat(sellerData.longitude) || 75.7873}
+                                    onLocationSelect={(lat, lng) => {
+                                      setSellerData(prev => ({
+                                        ...prev,
+                                        latitude: lat.toString(),
+                                        longitude: lng.toString()
+                                      }));
+                                    }}
+                                  />
+                                  <p className="mt-1 text-xs text-neutral-500 text-center">
+                                    Selected Coordinates: {sellerData.latitude || 'Not selected'}, {sellerData.longitude || 'Not selected'}
+                                  </p>
+                                </div>
                               </>
                             ) : (
                               <textarea
@@ -460,7 +460,7 @@ const SellerAccountSettings = () => {
                               value={sellerData.serviceRadiusKm}
                               onChange={handleInputChange}
                               disabled={!isEditing}
-                              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all appearance-none bg-white"
+                              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all appearance-none bg-white"
                             >
                               <option value="1">1 km</option>
                               <option value="2">2 km</option>
@@ -484,7 +484,7 @@ const SellerAccountSettings = () => {
                       <div className="space-y-8">
                         <div className="space-y-3">
                           <label className="text-sm font-semibold text-gray-700 ml-1">Store Banner</label>
-                          <div className="relative group rounded-xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 aspect-[21/9] transition-all hover:border-teal-300">
+                          <div className="relative group rounded-xl overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300 aspect-[21/9] transition-all hover:border-teal-700">
                             <img
                               src={sellerData.storeBanner || 'https://placehold.co/1200x400?text=Store+Banner'}
                               alt="Store Banner"
@@ -513,7 +513,7 @@ const SellerAccountSettings = () => {
                             disabled={!isEditing}
                             rows={6}
                             placeholder="Tell customers about your store, specialty, and heritage..."
-                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all resize-none leading-relaxed"
+                            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 outline-none disabled:bg-gray-50/50 disabled:text-gray-500 transition-all resize-none leading-relaxed"
                           />
                         </div>
                       </div>
@@ -568,7 +568,7 @@ const SellerAccountSettings = () => {
                       <button
                         type="submit"
                         disabled={saveLoading}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 ${saveLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className={`px-6 py-2.5 rounded-lg text-sm font-bold text-white bg-gradient-to-r from-teal-700 to-teal-800 hover:from-teal-800 hover:to-teal-900 shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 ${saveLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                       >
                         {saveLoading ? (
                           <span className="flex items-center gap-2">
@@ -601,7 +601,7 @@ const InputGroup = ({ label, name, value, onChange, disabled, type = "text", pla
       disabled={disabled}
       placeholder={placeholder}
       autoComplete={autoComplete}
-      className={`w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 outline-none transition-all ${disabled ? 'bg-gray-50/50 text-gray-500 cursor-default' : 'bg-white'
+      className={`w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-teal-700/20 focus:border-teal-700 outline-none transition-all ${disabled ? 'bg-gray-50/50 text-gray-500 cursor-default' : 'bg-white'
 
         }`}
     />

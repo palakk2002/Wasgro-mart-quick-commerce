@@ -81,7 +81,7 @@ export default function SellerOrderDetail() {
           <p className="text-red-600 mb-4">{error}</p>
           <button
             onClick={() => navigate("/seller/orders")}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg transition-colors">
+            className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg transition-colors">
             Back to Orders
           </button>
         </div>
@@ -98,7 +98,7 @@ export default function SellerOrderDetail() {
           </h2>
           <button
             onClick={() => navigate("/seller/orders")}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg transition-colors">
+            className="bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg transition-colors">
             Back to Orders
           </button>
         </div>
@@ -370,7 +370,7 @@ export default function SellerOrderDetail() {
     <div className="min-h-screen bg-neutral-50 pb-8">
       {/* Order Action Section */}
       <div className="bg-white mb-6 rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="bg-teal-600 text-white px-4 sm:px-6 py-3">
+        <div className="bg-teal-700 text-white px-4 sm:px-6 py-3">
           <h2 className="text-base sm:text-lg font-semibold">
             Order Action Section
           </h2>
@@ -382,7 +382,7 @@ export default function SellerOrderDetail() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleStatusUpdate("Accepted")}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm">
+                    className="flex-1 bg-teal-700 hover:bg-teal-800 text-white px-6 py-2 rounded-lg transition-colors font-medium shadow-sm">
                     Accept Order
                   </button>
                   <button
@@ -403,7 +403,7 @@ export default function SellerOrderDetail() {
                 <select
                   value={orderStatus}
                   onChange={(e) => handleStatusUpdate(e.target.value)}
-                  className="w-full sm:w-64 px-4 py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
+                  className="w-full sm:w-64 px-4 py-2 border border-neutral-300 rounded-lg text-sm text-neutral-900 bg-white focus:outline-none focus:ring-2 focus:ring-teal-700 focus:border-teal-700"
                   disabled={
                     orderStatus === "Rejected" ||
                     orderStatus === "Cancelled" ||
@@ -421,7 +421,7 @@ export default function SellerOrderDetail() {
             </div>
             <button
               onClick={handleExportPDF}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+              className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
               <svg
                 width="16"
                 height="16"
@@ -439,7 +439,7 @@ export default function SellerOrderDetail() {
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
+              className="flex items-center gap-2 bg-teal-700 hover:bg-teal-800 text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium">
               <svg
                 width="16"
                 height="16"
@@ -459,7 +459,7 @@ export default function SellerOrderDetail() {
 
       {/* View Order Details Section */}
       <div className="bg-white rounded-lg shadow-sm border border-neutral-200 overflow-hidden">
-        <div className="bg-teal-600 text-white px-4 sm:px-6 py-3">
+        <div className="bg-teal-700 text-white px-4 sm:px-6 py-3">
           <h2 className="text-base sm:text-lg font-semibold">
             View Order Details
           </h2>
@@ -470,14 +470,14 @@ export default function SellerOrderDetail() {
             {/* Left: Company Info */}
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-green-600 rounded flex items-center justify-center">
+                <div className="w-8 h-8 bg-teal-700 rounded flex items-center justify-center">
                   <span className="text-white text-xs font-bold">A</span>
                 </div>
                 <div>
-                  <div className="text-xs text-green-600 font-semibold">
+                  <div className="text-xs text-teal-700 font-semibold">
                     Wasgro mart
                   </div>
-                  <div className="text-[10px] text-green-600">
+                  <div className="text-[10px] text-teal-700">
                     in 10 Minutes
                   </div>
                 </div>
@@ -589,7 +589,7 @@ export default function SellerOrderDetail() {
       <footer className="mt-6 px-4 sm:px-6 text-center py-4 bg-neutral-100 rounded-lg">
         <p className="text-xs sm:text-sm text-neutral-600">
           Copyright © 2025. Developed By{" "}
-          <span className="font-semibold text-teal-600">
+          <span className="font-semibold text-teal-700">
             Wasgro mart - 10 Minute App
           </span>
         </p>

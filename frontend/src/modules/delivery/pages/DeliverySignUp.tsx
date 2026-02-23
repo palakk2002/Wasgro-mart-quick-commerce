@@ -297,7 +297,7 @@ export default function DeliverySignUp() {
             <div className="relative mb-2 group">
               <div className="absolute inset-0 bg-white/20 rounded-full blur-xl transform group-hover:scale-110 transition-transform duration-500" />
               <img
-                src="/assets/wasgrologo-removebg-preview.png"
+                src="/assets/wasgromartfinal-removebg-preview.png"
                 alt="Wasgro Mart"
                 className="h-32 w-auto object-contain relative z-10 drop-shadow-lg transform hover:scale-105 transition-transform duration-300"
               />

@@ -334,6 +334,15 @@ export default function ProductDetail() {
 
           {/* Action icons - top right */}
           <div className="flex items-center gap-2">
+            {/* Logo - top right */}
+            <div className="flex-shrink-0">
+              <img
+                src="/assets/wasgromart-black-text-removebg-preview.png"
+                alt="Wasgro-mart Logo"
+                className="h-20 w-auto object-contain md:h-24 -my-4 md:-my-6 relative z-10"
+                style={{ minWidth: '70px' }}
+              />
+            </div>
             {/* Heart icon */}
             {product?.id && (
               <WishlistButton

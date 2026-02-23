@@ -417,6 +417,15 @@ export default function HomeHero({
                 </div>
               )}
             </div>
+            {/* Logo - top right */}
+            <div className="flex-shrink-0">
+              <img
+                src="/assets/wasgromart-black-text-removebg-preview.png"
+                alt="Wasgro-mart Logo"
+                className="h-24 w-auto object-contain md:h-28 -my-6 md:-my-8 relative z-10"
+                style={{ minWidth: '80px' }}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -254,29 +254,29 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
               {/* Location line - only show if user has provided location */}
               {userLocation && (userLocation.address || userLocation.city) && (
-              <div className="px-4 md:px-6 lg:px-8 py-2 flex items-center justify-between text-sm">
+                <div className="px-4 md:px-6 lg:px-8 py-2 flex items-center justify-between text-sm">
                   <span className="text-neutral-700 line-clamp-1" title={userLocation?.address || ''}>
-                  {userLocation?.address
-                    ? userLocation.address.length > 50
-                      ? `${userLocation.address.substring(0, 50)}...`
-                      : userLocation.address
-                    : userLocation?.city && userLocation?.state
-                      ? `${userLocation.city}, ${userLocation.state}`
+                    {userLocation?.address
+                      ? userLocation.address.length > 50
+                        ? `${userLocation.address.substring(0, 50)}...`
+                        : userLocation.address
+                      : userLocation?.city && userLocation?.state
+                        ? `${userLocation.city}, ${userLocation.state}`
                         : userLocation?.city || ''}
-                </span>
-                <button
-                  onClick={() => setShowLocationChangeModal(true)}
-                  className="text-blue-600 font-medium hover:text-blue-700 transition-colors flex-shrink-0 ml-2"
-                >
-                  Change
-                </button>
-              </div>
+                  </span>
+                  <button
+                    onClick={() => setShowLocationChangeModal(true)}
+                    className="text-blue-600 font-medium hover:text-blue-700 transition-colors flex-shrink-0 ml-2"
+                  >
+                    Change
+                  </button>
+                </div>
               )}
 
               {/* Search bar - Hidden on Order Again page */}
               {showSearchBar && (
-                <div className="px-4 md:px-6 lg:px-8 pb-3">
-                  <div className="relative max-w-2xl md:mx-auto">
+                <div className="px-4 md:px-6 lg:px-8 pb-3 flex items-center justify-between gap-3">
+                  <div className="relative flex-1 max-w-2xl md:mx-auto">
                     <input
                       type="text"
                       value={searchQuery}
@@ -285,6 +285,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
                       className="w-full px-4 py-2.5 pl-10 bg-neutral-50 border border-neutral-200 rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent md:py-3"
                     />
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">🔍</span>
+                  </div>
+                  {/* Logo - top right */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src="/assets/wasgromart-black-text-removebg-preview.png"
+                      alt="Wasgro-mart Logo"
+                      className="h-20 w-auto object-contain md:h-24 -my-4 md:-my-6 relative z-10"
+                      style={{ minWidth: '70px' }}
+                    />
                   </div>
                 </div>
               )}
