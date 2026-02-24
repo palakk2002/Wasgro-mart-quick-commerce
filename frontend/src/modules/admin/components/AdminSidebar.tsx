@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { usePermission } from "../../../context/PermissionContext";
 
 interface SubMenuItem {
   label: string;
@@ -7,6 +8,7 @@ interface SubMenuItem {
   icon: JSX.Element;
   badge?: string;
   badgeColor?: string;
+  permission?: string;
 }
 
 interface MenuItem {
@@ -16,11 +18,13 @@ interface MenuItem {
   submenuItems?: SubMenuItem[];
   icon?: JSX.Element;
   badge?: string;
+  permission?: string;
 }
 
 interface MenuSection {
   title: string;
   items: MenuItem[];
+  permission?: string;
 }
 
 interface AdminSidebarProps {
@@ -34,6 +38,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Category",
         path: "/admin/category",
+        permission: "manage_categories",
         hasSubmenu: true,
         submenuItems: [
           {
@@ -109,6 +114,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Brand",
         path: "/admin/brand",
+        permission: "manage_brands",
         icon: (
           <svg
             width="18"
@@ -126,6 +132,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Product",
         path: "/admin/product",
+        permission: "manage_products",
         hasSubmenu: true,
         icon: (
           <svg
@@ -189,6 +196,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Manage Seller",
         path: "/admin/manage-seller",
+        permission: "manage_sellers",
         hasSubmenu: true,
         icon: (
           <svg
@@ -240,6 +248,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Manage Location",
         path: "/admin/manage-location",
+        permission: "manage_locations",
         hasSubmenu: true,
         icon: (
           <svg
@@ -281,6 +290,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Coupon",
         path: "/admin/coupon",
+        permission: "manage_coupons",
         icon: (
           <svg
             width="18"
@@ -300,6 +310,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Delivery Boy",
         path: "/admin/delivery-boy",
+        permission: "manage_delivery_boys",
         hasSubmenu: true,
         icon: (
           <svg
@@ -375,6 +386,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Wallet",
         path: "/admin/wallet",
+        permission: "manage_wallet",
         icon: (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <rect x="2" y="6" width="20" height="12" rx="2" />
@@ -385,6 +397,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Withdrawals",
         path: "/admin/withdrawals",
+        permission: "manage_withdrawals",
         icon: (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
@@ -395,6 +408,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Seller Transaction",
         path: "/admin/manage-seller/transaction",
+        permission: "view_seller_transactions",
         icon: (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
@@ -407,6 +421,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Cash Collection",
         path: "/admin/delivery-boy/cash-collection",
+        permission: "manage_cash_collection",
         icon: (
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="10" />
@@ -423,6 +438,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Users",
         path: "/admin/users",
+        permission: "manage_users",
         icon: (
           <svg
             width="18"
@@ -443,6 +459,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Notification",
         path: "/admin/notification",
+        permission: "manage_notifications",
         icon: (
           <svg
             width="18"
@@ -462,6 +479,7 @@ const menuSections: MenuSection[] = [
       {
         label: "FAQ",
         path: "/admin/faq",
+        permission: "manage_faq",
         icon: (
           <svg
             width="18"
@@ -492,6 +510,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Order List",
         path: "/admin/orders",
+        permission: "manage_orders",
         hasSubmenu: true,
         icon: (
           <svg
@@ -691,6 +710,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Home Section",
         path: "/admin/home-section",
+        permission: "manage_promotions",
         icon: (
           <svg
             width="18"
@@ -808,6 +828,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Payment List",
         path: "/admin/payment-list",
+        permission: "manage_settings",
         icon: (
           <svg
             width="18"
@@ -828,6 +849,7 @@ const menuSections: MenuSection[] = [
       {
         label: "SMS Gateway",
         path: "/admin/sms-gateway",
+        permission: "manage_settings",
         icon: (
           <svg
             width="18"
@@ -846,6 +868,7 @@ const menuSections: MenuSection[] = [
       {
         label: "System User",
         path: "/admin/system-user",
+        permission: "manage_system_users",
         icon: (
           <svg
             width="18"
@@ -866,6 +889,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Customer App Policy",
         path: "/admin/customer-app-policy",
+        permission: "manage_settings",
         icon: (
           <svg
             width="18"
@@ -885,6 +909,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Delivery App Policy",
         path: "/admin/delivery-app-policy",
+        permission: "manage_settings",
         icon: (
           <svg
             width="18"
@@ -904,6 +929,7 @@ const menuSections: MenuSection[] = [
       {
         label: "Billing & Charges",
         path: "/admin/billing-settings",
+        permission: "manage_settings",
         icon: (
           <svg
             width="18"
@@ -915,6 +941,26 @@ const menuSections: MenuSection[] = [
             strokeLinecap="round"
             strokeLinejoin="round">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+        ),
+      },
+      {
+        label: "Roles",
+        path: "/admin/roles",
+        permission: "manage_roles",
+        icon: (
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <circle cx="12" cy="11" r="3"></circle>
+            <path d="M7 20h10"></path>
           </svg>
         ),
       },
@@ -973,13 +1019,21 @@ export default function AdminSidebar({ onClose }: AdminSidebarProps) {
     );
   };
 
-  // Filter menu items based on search query
+  const { hasPermission } = usePermission();
+
+  // Filter menu items based on search query and permissions
   const filteredSections = menuSections
     .map((section) => ({
       ...section,
-      items: section.items.filter((item) =>
-        item.label.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
+      items: section.items.filter((item) => {
+        // First check search query
+        const matchesSearch = item.label.toLowerCase().includes(searchQuery.toLowerCase());
+
+        // Then check permissions
+        const hasAccess = item.permission ? hasPermission(item.permission) : true;
+
+        return matchesSearch && hasAccess;
+      }),
     }))
     .filter((section) => section.items.length > 0);
 

@@ -4,6 +4,9 @@ import { otpRateLimiter, loginRateLimiter } from "../middleware/rateLimiter";
 
 const router = Router();
 
+// Public: Get roles available for registration (no auth required)
+router.get("/roles", adminAuthController.getPublicRoles);
+
 // Send OTP route
 router.post("/send-otp", otpRateLimiter, adminAuthController.sendOTP);
 

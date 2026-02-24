@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { register } from "../../../services/api/auth/adminAuthService";
+import { register, getPublicRoles, PublicRole } from "../../../services/api/auth/adminAuthService";
 
 export default function AdminRegister() {
     const navigate = useNavigate();
@@ -12,11 +12,32 @@ export default function AdminRegister() {
         mobile: "",
         email: "",
         password: "",
+        roleId: "",
     });
+    const [roles, setRoles] = useState<PublicRole[]>([]);
+    const [rolesLoading, setRolesLoading] = useState(true);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Fetch available roles on mount
+    useEffect(() => {
+        const fetchRoles = async () => {
+            try {
+                const data = await getPublicRoles();
+                setRoles(data);
+            } catch {
+                // Silently handle — dropdown will be empty and Staff will be default
+                console.error("Failed to fetch roles");
+            } finally {
+                setRolesLoading(false);
+            }
+        };
+        fetchRoles();
+    }, []);
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target;
         if (name === "mobile") {
             setFormData((prev) => ({
@@ -43,20 +64,28 @@ export default function AdminRegister() {
         }
 
         try {
-            const response = await register(formData);
+            const { roleId, ...rest } = formData;
+            const payload = {
+                ...rest,
+                ...(roleId ? { roleId } : {}),
+            };
+
+            const response = await register(payload);
             if (response.success && response.data) {
                 // Login the user
+                const userData = response.data.user;
                 login(response.data.token, {
-                    ...response.data.user,
+                    ...userData,
                     userType: "Admin",
                 });
                 navigate("/admin");
             } else {
                 setError(response.message || "Registration failed");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { message?: string } } };
             setError(
-                err.response?.data?.message || "Registration failed. Please try again."
+                axiosErr.response?.data?.message || "Registration failed. Please try again."
             );
         } finally {
             setLoading(false);
@@ -175,6 +204,48 @@ export default function AdminRegister() {
                                 required
                                 className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-green-400/50 focus:bg-black/30 transition-all font-medium text-sm shadow-inner"
                             />
+
+                            {/* Role Selection Dropdown */}
+                            <div className="relative">
+                                <select
+                                    name="roleId"
+                                    value={formData.roleId}
+                                    onChange={handleInputChange}
+                                    disabled={rolesLoading}
+                                    className="w-full px-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white focus:outline-none focus:border-green-400/50 focus:bg-black/30 transition-all font-medium text-sm shadow-inner appearance-none cursor-pointer disabled:opacity-50"
+                                >
+                                    <option value="" className="bg-[#1a4a33] text-white">
+                                        {rolesLoading ? "Loading roles..." : "Select Role (default: Staff)"}
+                                    </option>
+                                    {roles.map((role) => (
+                                        <option
+                                            key={role._id}
+                                            value={role._id}
+                                            className="bg-[#1a4a33] text-white"
+                                        >
+                                            {role.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                {/* Dropdown arrow */}
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        className="text-white/50"
+                                    >
+                                        <path
+                                            d="M6 9l6 6 6-6"
+                                            stroke="currentColor"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
 
                         {error && (

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, User } from "../context/AuthContext";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -26,9 +26,7 @@ export default function ProtectedRoute({
   // Check user type if required
   if (requiredUserType && user) {
     // Check userType or role field
-    // Admin users have role: "Admin" or "Super Admin"
-    // For Admin userType check, we need to verify the user is an admin
-    const userType = (user as any).userType || (user as any).role;
+    const userType = user.userType || (typeof user.role === 'string' ? user.role : user.role?.name);
 
     // For Admin routes, check if role is "Admin" or "Super Admin"
     if (requiredUserType === "Admin") {
@@ -49,7 +47,7 @@ export default function ProtectedRoute({
 
   // Check role if required (for Admin users)
   if (requiredRole && user) {
-    const userRole = (user as any).role;
+    const userRole = typeof user.role === 'string' ? user.role : user.role?.name;
     if (!userRole || userRole !== requiredRole) {
       return <Navigate to="/" replace />;
     }

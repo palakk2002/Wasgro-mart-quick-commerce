@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Admin from "../../../models/Admin";
+import Role from "../../../models/Role";
 import {
   sendOTP as sendOTPService,
   verifyOTP as verifyOTPService,
@@ -67,13 +68,31 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  // Find admin
+  // Find admin and populate roleRef if it exists
   const admin = await Admin.findOne({ mobile }).select("-password");
   if (!admin) {
     return res.status(404).json({
       success: false,
       message: "Admin not found",
     });
+  }
+
+  // Build role info for response
+  let roleData: { _id?: string; name: string; permissions: string[] } = {
+    name: admin.role,
+    permissions: [],
+  };
+
+  // If admin has a roleRef, populate permissions from Role collection
+  if (admin.roleRef) {
+    const roleDoc = await Role.findById(admin.roleRef);
+    if (roleDoc) {
+      roleData = {
+        _id: roleDoc._id.toString(),
+        name: roleDoc.name,
+        permissions: roleDoc.permissions,
+      };
+    }
   }
 
   // Generate JWT token
@@ -90,17 +109,17 @@ export const verifyOTP = asyncHandler(async (req: Request, res: Response) => {
         lastName: admin.lastName,
         mobile: admin.mobile,
         email: admin.email,
-        role: admin.role,
+        role: roleData,
       },
     },
   });
 });
 
 /**
- * Register new admin (optional - typically admins are created by super admin)
+ * Register new admin
  */
 export const register = asyncHandler(async (req: Request, res: Response) => {
-  const { firstName, lastName, mobile, email, password, role } = req.body;
+  const { firstName, lastName, mobile, email, password, roleId } = req.body;
 
   // Validation
   if (!firstName || !lastName || !mobile || !email || !password) {
@@ -129,6 +148,39 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
+  // Resolve role
+  let roleName = "Staff";
+  let roleRef: string | undefined;
+
+  if (roleId) {
+    // Look up the role by ID
+    const roleDoc = await Role.findById(roleId);
+    if (roleDoc) {
+      // Prevent registering as Super Admin or Admin (system roles)
+      if (roleDoc.name === "Super Admin" || roleDoc.name === "Admin") {
+        return res.status(403).json({
+          success: false,
+          message: "Cannot register with this role",
+        });
+      }
+      roleName = roleDoc.name;
+      roleRef = roleDoc._id.toString();
+    }
+  } else {
+    // Default: find or create "Staff" role
+    let staffRole = await Role.findOne({ name: "Staff" });
+    if (!staffRole) {
+      staffRole = await Role.create({
+        name: "Staff",
+        type: "Custom",
+        permissions: [],
+        description: "Default staff role with limited access",
+      });
+    }
+    roleName = staffRole.name;
+    roleRef = staffRole._id.toString();
+  }
+
   // Create new admin
   const admin = await Admin.create({
     firstName,
@@ -136,8 +188,26 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
     mobile,
     email,
     password,
-    role: role || "Admin",
+    role: roleName,
+    roleRef: roleRef,
   });
+
+  // Fetch the full role for response
+  let roleData: { _id?: string; name: string; permissions: string[] } = {
+    name: roleName,
+    permissions: [],
+  };
+
+  if (roleRef) {
+    const roleDoc = await Role.findById(roleRef);
+    if (roleDoc) {
+      roleData = {
+        _id: roleDoc._id.toString(),
+        name: roleDoc.name,
+        permissions: roleDoc.permissions,
+      };
+    }
+  }
 
   // Generate token
   const token = generateToken(admin._id.toString(), "Admin", admin.role);
@@ -153,8 +223,24 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
         lastName: admin.lastName,
         mobile: admin.mobile,
         email: admin.email,
-        role: admin.role,
+        role: roleData,
       },
     },
+  });
+});
+
+/**
+ * Get roles available for public registration
+ * Excludes system/admin roles (Super Admin, Admin)
+ */
+export const getPublicRoles = asyncHandler(async (_req: Request, res: Response) => {
+  const roles = await Role.find({
+    name: { $nin: ["Super Admin", "Admin"] },
+  }).select("_id name description").sort({ name: 1 });
+
+  return res.status(200).json({
+    success: true,
+    message: "Public roles fetched successfully",
+    data: roles,
   });
 });

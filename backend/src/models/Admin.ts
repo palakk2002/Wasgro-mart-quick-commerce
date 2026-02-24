@@ -6,7 +6,8 @@ export interface IAdmin extends Document {
   lastName: string;
   mobile: string;
   email: string;
-  role: 'Super Admin' | 'Admin';
+  role: string;
+  roleRef?: mongoose.Types.ObjectId;
   password: string;
   fcmTokens?: string[];
   fcmTokenMobile?: string[];
@@ -55,8 +56,11 @@ const AdminSchema = new Schema<IAdmin>(
     role: {
       type: String,
       required: [true, 'Role is required'],
-      enum: ['Super Admin', 'Admin'],
       default: 'Admin',
+    },
+    roleRef: {
+      type: Schema.Types.ObjectId,
+      ref: 'Role',
     },
     password: {
       type: String,
@@ -103,4 +107,3 @@ AdminSchema.methods.comparePassword = async function (
 const Admin = mongoose.model<IAdmin>('Admin', AdminSchema);
 
 export default Admin;
-

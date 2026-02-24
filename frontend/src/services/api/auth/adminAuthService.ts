@@ -1,4 +1,5 @@
 import api, { setAuthToken, removeAuthToken } from '../config';
+import { Role } from "../../../types/rbac";
 
 export interface SendOTPResponse {
   success: boolean;
@@ -16,7 +17,7 @@ export interface VerifyOTPResponse {
       lastName: string;
       mobile: string;
       email: string;
-      role: string;
+      role: Role | string;
     };
   };
 }
@@ -27,7 +28,7 @@ export interface RegisterData {
   mobile: string;
   email: string;
   password: string;
-  role?: string;
+  roleId?: string;
 }
 
 export interface RegisterResponse {
@@ -41,7 +42,7 @@ export interface RegisterResponse {
       lastName: string;
       mobile: string;
       email: string;
-      role: string;
+      role: Role | string;
     };
   };
 }
@@ -122,4 +123,26 @@ export const updateAdminProfile = async (data: {
 }): Promise<AdminProfileResponse> => {
   const response = await api.put<AdminProfileResponse>('/auth/admin/profile', data);
   return response.data;
+};
+
+/** Public role info returned by the registration roles endpoint. */
+export interface PublicRole {
+  _id: string;
+  name: string;
+  description?: string;
+}
+
+interface PublicRolesResponse {
+  success: boolean;
+  message: string;
+  data: PublicRole[];
+}
+
+/**
+ * Fetch roles available for public registration (no auth required).
+ * Excludes Super Admin and Admin roles.
+ */
+export const getPublicRoles = async (): Promise<PublicRole[]> => {
+  const response = await api.get<PublicRolesResponse>('/auth/admin/roles');
+  return response.data.data;
 };

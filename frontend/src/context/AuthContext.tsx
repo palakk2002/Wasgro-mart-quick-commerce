@@ -10,11 +10,30 @@ import {
   removeAuthToken,
   setAuthToken,
 } from "../services/api/config";
+import { Role } from "../types/rbac";
 
-interface User {
+export interface User {
   id: string;
   userType?: "Admin" | "Seller" | "Customer" | "Delivery";
-  [key: string]: any;
+  role?: Role | string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  mobile?: string;
+  image?: string;
+  walletAmount?: number;
+  refCode?: string;
+  status?: string;
+  totalOrders?: number;
+  totalSpent?: number;
+  registrationDate?: string;
+  city?: string;
+  address?: string;
+  storeName?: string;
+  categories?: any[];
+  category?: string;
 }
 
 interface AuthContextType {

@@ -11,7 +11,7 @@ export default function PublicRoute({ children, userType: allowedUserType }: Pub
 
     if (isAuthenticated && user) {
         // Redirect authenticated users to their respective dashboards
-        const currentUserType = (user as any).userType || (user as any).role;
+        const currentUserType = user.userType || (typeof user.role === 'string' ? user.role : user.role?.name);
 
         // If an allowedUserType is specified (e.g., 'Seller' for SellerLogin),
         // ONLY redirect if the logged-in user matches that type.
