@@ -9,9 +9,11 @@ import {
   updateProductStatus,
   bulkUpdateStock,
   getShops,
+  bulkUpload,
 } from "../modules/seller/controllers/productController";
 import { getBrands } from "../modules/admin/controllers/adminProductController";
 import { authenticate, requireUserType } from "../middleware/auth";
+import { uploadExcel, handleUploadError } from "../middleware/upload";
 
 const router = Router();
 
@@ -48,5 +50,13 @@ router.patch("/bulk-stock-update", bulkUpdateStock);
 
 // Update product status (publish, popular, dealOfDay)
 router.patch("/:id/status", updateProductStatus);
+
+// Bulk upload products
+router.post(
+  "/bulk-upload",
+  uploadExcel.single("file"),
+  handleUploadError,
+  bulkUpload
+);
 
 export default router;

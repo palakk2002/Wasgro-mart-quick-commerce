@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
+import * as xlsx from "xlsx";
 import Product from "../../../models/Product";
+import Category from "../../../models/Category";
+import SubCategory from "../../../models/SubCategory";
 import Shop from "../../../models/Shop";
 import { asyncHandler } from "../../../utils/asyncHandler";
 
@@ -583,4 +587,188 @@ export const getShops = asyncHandler(async (_req: Request, res: Response) => {
     message: "Shops fetched successfully",
     data: shops || [],
   });
+});
+
+/**
+ * Bulk upload products from Excel/CSV
+ */
+export const bulkUpload = asyncHandler(async (req: Request, res: Response) => {
+  const sellerId = (req as any).user.userId;
+
+  if (!(req as any).file) {
+    return res.status(400).json({
+      success: false,
+      message: "Please upload an Excel or CSV file",
+    });
+  }
+
+  try {
+    // Read the file buffer
+    const workbook = xlsx.read((req as any).file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = xlsx.utils.sheet_to_json(sheet) as any[];
+
+    if (rows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "The uploaded file is empty",
+      });
+    }
+
+    const results = {
+      total: rows.length,
+      inserted: 0,
+      failed: 0,
+      errors: [] as any[],
+    };
+
+    // Get all categories and subcategories to map names/IDs
+    const [categories, subCategories] = await Promise.all([
+      Category.find({}).select("_id name status"),
+      SubCategory.find({}).select("_id name category"),
+    ]);
+
+    const categoryNameMap = new Map();
+    const categoryIdMap = new Map();
+    const subCategoryNameMap = new Map();
+    const subCategoryIdMap = new Map();
+
+    categories.forEach((cat: any) => {
+      const name = cat.name.toLowerCase().trim();
+      categoryNameMap.set(name, cat);
+      categoryIdMap.set(cat._id.toString(), cat);
+    });
+
+    subCategories.forEach((sub: any) => {
+      const name = sub.name.toLowerCase().trim();
+      subCategoryNameMap.set(name, sub);
+      subCategoryIdMap.set(sub._id.toString(), sub);
+    });
+
+    const productsToInsert: any[] = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const rowIndex = i + 2; // +1 for 0-indexed, +1 for header row
+
+      const name = row.name || row.productName || row.Name;
+      const price = parseFloat(row.price || row.Price);
+      const stock = parseInt(row.stock || row.Stock);
+      const categoryInput = (row.category || row.Category || "").toString().trim();
+      const categoryInputLower = categoryInput.toLowerCase();
+      const description = row.description || row.Description || "";
+
+      // Basic validation
+      const rowErrors: string[] = [];
+      if (!name) rowErrors.push("Product name is missing");
+      if (isNaN(price)) rowErrors.push("Invalid or missing price");
+      if (isNaN(stock)) rowErrors.push("Invalid or missing stock");
+      if (!categoryInput) rowErrors.push("Category/Subcategory is missing");
+
+      let categoryId: any = null;
+      let subcategoryId: any = null;
+
+      // 1. Try to match as SubCategory (by Name or ID)
+      let matchedSubCategory = subCategoryNameMap.get(categoryInputLower);
+      if (!matchedSubCategory && mongoose.Types.ObjectId.isValid(categoryInput)) {
+        matchedSubCategory = subCategoryIdMap.get(categoryInput);
+      }
+
+      if (matchedSubCategory) {
+        subcategoryId = matchedSubCategory._id;
+        categoryId = matchedSubCategory.category; // Parent category
+      } else {
+        // 2. Try to match as Category (by Name or ID)
+        let matchedCategory = categoryNameMap.get(categoryInputLower);
+        if (!matchedCategory && mongoose.Types.ObjectId.isValid(categoryInput)) {
+          matchedCategory = categoryIdMap.get(categoryInput);
+        }
+
+        if (matchedCategory) {
+          if (matchedCategory.status !== "Active") {
+            rowErrors.push(`Category '${categoryInput}' is inactive`);
+          } else {
+            categoryId = matchedCategory._id;
+          }
+        } else if (categoryInput) {
+          rowErrors.push(`Category/Subcategory '${categoryInput}' not found`);
+        }
+      }
+
+      if (rowErrors.length > 0) {
+        results.failed++;
+        results.errors.push({
+          row: rowIndex,
+          product: name || "Unknown",
+          errors: rowErrors,
+        });
+        continue;
+      }
+
+      // Prepare product data
+      productsToInsert.push({
+        productName: name,
+        price: price,
+        compareAtPrice: price, // Default MRP to price if not provided
+        stock: stock,
+        category: categoryId,
+        subcategory: subcategoryId,
+        description: description,
+        smallDescription: description.substring(0, 150),
+        seller: sellerId,
+        publish: true,
+        status: "Active",
+        requiresApproval: false,
+        rating: 0,
+        reviewsCount: 0,
+        discount: 0,
+        tags: [],
+        variations: [
+          {
+            name: "Default",
+            value: "Standard",
+            price: price,
+            stock: stock,
+            status: stock > 0 ? "Available" : "Sold out",
+          },
+        ],
+      });
+    }
+
+    if (productsToInsert.length > 0) {
+      try {
+        const insertedProducts = await Product.insertMany(productsToInsert, { ordered: false });
+        results.inserted = insertedProducts.length;
+      } catch (bulkError: any) {
+        // Handle partial success with insertMany
+        if (bulkError.insertedDocs) {
+          results.inserted = bulkError.insertedDocs.length;
+        }
+        if (bulkError.writeErrors) {
+          results.failed += bulkError.writeErrors.length;
+          bulkError.writeErrors.forEach((we: any) => {
+            results.errors.push({
+              row: "DB",
+              product: "Multiple",
+              errors: [we.errmsg || "Database constraint error"],
+            });
+          });
+        }
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Bulk upload completed: ${results.inserted} inserted, ${results.failed} failed`,
+      data: results,
+    });
+  } catch (error: any) {
+    console.error("Bulk upload error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while processing the file",
+      error: error.message,
+    });
+  }
 });

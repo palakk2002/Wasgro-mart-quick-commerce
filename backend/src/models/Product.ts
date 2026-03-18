@@ -1,6 +1,6 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Schema, model } from "mongoose";
 
-export interface IProduct extends Document {
+export interface IProduct extends mongoose.Document {
   // Basic Info
   productName: string;
   smallDescription?: string;
@@ -336,17 +336,17 @@ const ProductSchema = new Schema<IProduct>(
 );
 
 // Virtual for mrp (alias for compareAtPrice to match frontend)
-ProductSchema.virtual("mrp").get(function () {
+ProductSchema.virtual("mrp").get(function (this: IProduct) {
   return this.compareAtPrice;
 });
 
 // Calculate discount and sync stock/price from variations before saving
-ProductSchema.pre("save", function (next) {
+ProductSchema.pre("save", function (this: IProduct, next: (err?: Error) => void) {
   // Sync price and stock from variations if they exist
   if (this.variations && this.variations.length > 0) {
     // Set price to the price of the first variation if top-level price is not set or if we want to keep it in sync
     if (this.variations[0].price !== undefined) {
-      this.price = this.variations[0].price;
+      this.price = this.variations[0].price as number;
     }
 
     // Calculate total stock as sum of all variation stocks
@@ -386,6 +386,6 @@ ProductSchema.index({
   pack: "text",
 });
 
-const Product = mongoose.model<IProduct>("Product", ProductSchema);
+const Product = model<IProduct>("Product", ProductSchema);
 
 export default Product;

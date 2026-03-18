@@ -148,6 +148,9 @@ const SellerAccountSettings = lazy(
 );
 const SellerLogin = lazy(() => import("./modules/seller/pages/SellerLogin"));
 const SellerSignUp = lazy(() => import("./modules/seller/pages/SellerSignUp"));
+const SellerBulkUpload = lazy(
+  () => import("./modules/seller/pages/SellerBulkUpload"),
+);
 
 // Lazy load admin routes
 const AdminLayout = lazy(
@@ -516,6 +519,10 @@ function AppContent() {
                                     <Route
                                       path="product/stock"
                                       element={<SellerStockManagement />}
+                                    />
+                                    <Route
+                                      path="product/bulk-upload"
+                                      element={<SellerBulkUpload />}
                                     />
                                     <Route
                                       path="return"

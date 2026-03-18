@@ -20,6 +20,11 @@ const ALLOWED_DOCUMENT_TYPES = [
   "image/webp",
   "application/pdf",
 ];
+const ALLOWED_EXCEL_TYPES = [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+  "application/vnd.ms-excel", // .xls
+  "text/csv", // .csv
+];
 
 // Memory storage for multer (files will be stored in memory as buffers)
 const storage = multer.memoryStorage();
@@ -53,6 +58,23 @@ const documentFileFilter = (
     cb(
       new Error(
         `Invalid file type. Allowed types: ${ALLOWED_DOCUMENT_TYPES.join(", ")}`
+      )
+    );
+  }
+};
+
+// File filter for Excel/CSV
+const excelFileFilter = (
+  _req: Request,
+  file: any,
+  cb: multer.FileFilterCallback
+) => {
+  if (ALLOWED_EXCEL_TYPES.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new Error(
+        `Invalid file type. Allowed types: .xlsx, .xls, .csv`
       )
     );
   }
@@ -92,6 +114,15 @@ export const uploadMultipleDocuments = multer({
     fileSize: MAX_DOCUMENT_SIZE,
   },
   fileFilter: documentFileFilter,
+});
+
+// Multer instance for Excel upload
+export const uploadExcel = multer({
+  storage,
+  limits: {
+    fileSize: MAX_DOCUMENT_SIZE,
+  },
+  fileFilter: excelFileFilter,
 });
 
 // Error handler middleware for multer errors

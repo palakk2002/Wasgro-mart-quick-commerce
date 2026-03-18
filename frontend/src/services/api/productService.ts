@@ -230,3 +230,18 @@ export const getShops = async (): Promise<ApiResponse<Shop[]>> => {
   const response = await api.get<ApiResponse<Shop[]>>("/products/shops");
   return response.data;
 };
+
+/**
+ * Bulk upload products using Excel/CSV
+ */
+export const bulkUploadProducts = async (file: File): Promise<ApiResponse<any>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post<ApiResponse<any>>("/products/bulk-upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
