@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getOrderById, updateOrderStatus, Order } from '../../../services/api/admin/adminOrderService';
+import AssignDeliveryBoyModal from '../components/AssignDeliveryBoyModal';
 
 export default function AdminOrderDetail() {
   const { id } = useParams<{ id: string }>();
@@ -9,6 +10,7 @@ export default function AdminOrderDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [updating, setUpdating] = useState(false);
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   // Fetch order detail from API
   useEffect(() => {
@@ -163,6 +165,18 @@ export default function AdminOrderDetail() {
                   </option>
                 ))}
               </select>
+            </div>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <button
+                onClick={() => setAssignModalOpen(true)}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  order.deliveryBoy 
+                    ? 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200' 
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {order.deliveryBoy ? 'Re-assign Delivery Boy' : 'Assign Delivery Boy'}
+              </button>
             </div>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -332,6 +346,30 @@ export default function AdminOrderDetail() {
           </div>
         </div>
       </div>
+
+      {assignModalOpen && (
+        <AssignDeliveryBoyModal
+          isOpen={assignModalOpen}
+          onClose={() => setAssignModalOpen(false)}
+          orderId={order._id}
+          orderNumber={order.orderNumber}
+          currentDeliveryBoy={
+            typeof order.deliveryBoy === 'string'
+              ? order.deliveryBoy
+              : order.deliveryBoy && typeof order.deliveryBoy === 'object'
+              ? (order.deliveryBoy as any)._id
+              : undefined
+          }
+          onAssignSuccess={async () => {
+             // Refresh order details after assignment
+             if (id) {
+               const response = await getOrderById(id);
+               if (response.success) setOrder(response.data);
+             }
+             setAssignModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }

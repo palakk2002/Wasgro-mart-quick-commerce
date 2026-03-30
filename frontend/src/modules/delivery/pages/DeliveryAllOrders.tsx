@@ -103,8 +103,18 @@ export default function DeliveryAllOrders() {
                     <p className="text-neutral-500 text-xs">
                       {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}
                     </p>
-                    <p className="text-neutral-900 font-bold">₹ {order.totalAmount}</p>
+                    <div className="text-right">
+                      <p className="text-blue-600 font-bold text-sm">Earn: ₹ {order.deliveryEarning || 0}</p>
+                      {order.paymentMethod === 'COD' && (
+                        <p className="text-neutral-900 font-bold">Collect: ₹ {order.totalAmount}</p>
+                      )}
+                    </div>
                   </div>
+                  {order.createdAt && (
+                    <p className="text-neutral-500 text-xs">
+                      Ordered: {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  )}
                   {order.estimatedDeliveryTime && (
                     <p className="text-neutral-500 text-xs">
                       ETA: {order.estimatedDeliveryTime} {order.distance ? `• ${order.distance}` : ''}

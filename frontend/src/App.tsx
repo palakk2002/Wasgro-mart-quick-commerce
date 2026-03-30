@@ -4,6 +4,7 @@ import { CartProvider } from "./context/CartContext";
 import { OrdersProvider } from "./context/OrdersContext";
 import { PermissionProvider } from "./context/PermissionContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { SubscriptionProvider } from "./context/SubscriptionContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LocationProvider } from "./context/LocationContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -151,6 +152,15 @@ const SellerSignUp = lazy(() => import("./modules/seller/pages/SellerSignUp"));
 const SellerBulkUpload = lazy(
   () => import("./modules/seller/pages/SellerBulkUpload"),
 );
+const SellerSubscription = lazy(
+  () => import("./modules/seller/pages/SellerSubscription"),
+);
+const SellerSupport = lazy(
+  () => import("./modules/seller/pages/SellerSupport"),
+);
+const SellerPromotions = lazy(
+  () => import("./modules/seller/pages/SellerPromotions"),
+);
 
 // Lazy load admin routes
 const AdminLayout = lazy(
@@ -272,6 +282,15 @@ const AdminBillingSettings = lazy(
 );
 const AdminRoles = lazy(
   () => import("./modules/admin/pages/AdminRoles"),
+);
+const AdminSubscriptionManagement = lazy(
+  () => import("./modules/admin/pages/AdminSubscriptionManagement"),
+);
+const AdminSellerSubscriptions = lazy(
+  () => import("./modules/admin/pages/AdminSellerSubscriptions"),
+);
+const AdminSupportInbox = lazy(
+  () => import("./modules/admin/pages/AdminSupportInbox"),
 );
 
 import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
@@ -478,7 +497,8 @@ function AppContent() {
                               requiredUserType="Seller"
                               redirectTo="/seller/login">
                               <Suspense fallback={<IconLoader forceShow />}>
-                                <SellerLayout>
+                                <SubscriptionProvider>
+                                  <SellerLayout>
                                   <Routes>
                                     <Route
                                       path=""
@@ -544,8 +564,21 @@ function AppContent() {
                                       path="account-settings"
                                       element={<SellerAccountSettings />}
                                     />
+                                    <Route
+                                      path="subscription"
+                                      element={<SellerSubscription />}
+                                    />
+                                    <Route
+                                      path="support"
+                                      element={<SellerSupport />}
+                                    />
+                                    <Route
+                                      path="promotions"
+                                      element={<SellerPromotions />}
+                                    />
                                   </Routes>
                                 </SellerLayout>
+                              </SubscriptionProvider>
                               </Suspense>
                             </ProtectedRoute>
                           }
@@ -559,8 +592,9 @@ function AppContent() {
                               requiredUserType="Admin"
                               redirectTo="/admin/login">
                               <Suspense fallback={<IconLoader forceShow />}>
-                                <PermissionProvider>
-                                  <AdminLayout>
+                                <SubscriptionProvider>
+                                  <PermissionProvider>
+                                    <AdminLayout>
                                     <Routes>
                                       <Route
                                         path=""
@@ -758,9 +792,22 @@ function AppContent() {
                                         path="orders/:id"
                                         element={<AdminOrderDetail />}
                                       />
+                                      <Route
+                                        path="subscription-management"
+                                        element={<AdminSubscriptionManagement />}
+                                      />
+                                      <Route
+                                        path="seller-subscriptions"
+                                        element={<AdminSellerSubscriptions />}
+                                      />
+                                      <Route
+                                        path="support-inbox"
+                                        element={<AdminSupportInbox />}
+                                      />
                                     </Routes>
                                   </AdminLayout>
                                 </PermissionProvider>
+                              </SubscriptionProvider>
                               </Suspense>
                             </ProtectedRoute>
                           }

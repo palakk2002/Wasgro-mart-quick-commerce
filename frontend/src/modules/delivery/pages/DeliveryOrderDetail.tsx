@@ -693,6 +693,20 @@ export default function DeliveryOrderDetail() {
                 </div>
             )}
 
+            {/* Earning Banner */}
+            <div className="mx-4 mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
+                        <Icons.CheckCircle size={20} />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Your Earning</p>
+                        <p className="text-lg font-black text-blue-900">₹{order.deliveryEarning || 0}</p>
+                    </div>
+                </div>
+                <span className="px-3 py-1 bg-blue-200 text-blue-800 rounded-lg text-[10px] font-bold uppercase tracking-tight">Delivery Earning</span>
+            </div>
+
             {/* COD Banner */}
             {order.paymentMethod === 'COD' && order.status !== 'Delivered' && (
                 <div className="mx-4 mt-4 bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
@@ -821,8 +835,12 @@ export default function DeliveryOrderDetail() {
                             {order.paymentMethod === 'COD' ? 'Cash to Collect' : 'Payment Status'}
                         </span>
                         <span className={`text-xl font-bold ${order.paymentMethod === 'COD' ? 'text-neutral-900' : 'text-green-600'}`}>
-                            {order.paymentMethod === 'COD' ? `₹${order.totalAmount}` : 'Prepaid'}
+                            {order.paymentMethod === 'COD' ? `₹${order.totalAmount}` : 'Paid Online'}
                         </span>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-neutral-50 flex justify-between items-center text-sm">
+                        <span className="text-neutral-500">Your Earning</span>
+                        <span className="font-bold text-blue-600">₹{order.deliveryEarning || 0}</span>
                     </div>
                 </div>
 
@@ -835,8 +853,8 @@ export default function DeliveryOrderDetail() {
                         </div>
                         <div className="p-3 bg-neutral-50 rounded-lg">
                             <p className="text-xs text-neutral-500 mb-1">Order Date</p>
-                            <p className="text-sm font-bold text-neutral-900">
-                                {new Date(order.createdAt).toLocaleDateString()}
+                            <p className="text-[10px] sm:text-xs font-bold text-neutral-900 leading-tight">
+                                {new Date(order.createdAt).toLocaleDateString([], { day: '2-digit', month: 'short' })}, {new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                         </div>
                     </div>

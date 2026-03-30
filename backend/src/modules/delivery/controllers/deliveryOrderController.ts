@@ -6,6 +6,7 @@ import OrderItem from "../../../models/OrderItem";
 import Seller from "../../../models/Seller";
 import { generateDeliveryOtp, verifyDeliveryOtp } from "../../../services/deliveryOtpService";
 import { processOrderStatusTransition } from "../../../services/orderService";
+import { calculateOrderCommissions } from "../../../services/commissionService";
 
 /**
  * Helper to map order items for response
@@ -39,19 +40,24 @@ export const getAllOrdersHistory = asyncHandler(async (req: Request, res: Respon
     const total = await Order.countDocuments({ deliveryBoy: deliveryId });
 
     // Format orders for frontend
-    const formattedOrders = orders.map(order => ({
-        id: order._id,
-        orderId: order.orderNumber,
-        customerName: order.customerName,
-        customerPhone: order.customerPhone,
-        status: order.status,
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+        const commissionData = await calculateOrderCommissions(order._id as string);
+        return {
+            id: order._id,
+            orderId: order.orderNumber,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            status: order.status,
 
-        address: `${order.deliveryAddress.address}, ${order.deliveryAddress.city}`,
-        deliveryAddress: order.deliveryAddress,
-        totalAmount: order.total,
-        items: mapOrderItems(order.items),
-        createdAt: order.createdAt,
-        estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'
+            address: `${order.deliveryAddress.address}, ${order.deliveryAddress.city}`,
+            deliveryAddress: order.deliveryAddress,
+            totalAmount: order.total,
+            paymentMethod: order.paymentMethod,
+            items: mapOrderItems(order.items),
+            createdAt: order.createdAt,
+            estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+            deliveryEarning: commissionData.data?.deliveryBoy?.amount || 0
+        };
     }));
 
     res.status(200).json({
@@ -87,21 +93,26 @@ export const getTodayOrders = asyncHandler(async (req: Request, res: Response) =
         .populate("items")
         .sort({ updatedAt: -1 });
 
-    const formattedOrders = orders.map(order => ({
-        id: order._id,
-        orderId: order.orderNumber,
-        customerName: order.customerName,
-        customerPhone: order.customerPhone,
-        status: order.status,
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+        const commissionData = await calculateOrderCommissions(order._id as string);
+        return {
+            id: order._id,
+            orderId: order.orderNumber,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            status: order.status,
 
-        address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
-        deliveryAddress: order.deliveryAddress,
-        items: mapOrderItems(order.items), // Real items
-        totalAmount: order.total,
-        estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-        createdAt: order.createdAt,
-        // Distance calculation to be implemented. sending null/undefined for now to avoid fake data
-        distance: null
+            address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
+            deliveryAddress: order.deliveryAddress,
+            items: mapOrderItems(order.items), // Real items
+            totalAmount: order.total,
+            paymentMethod: order.paymentMethod,
+            estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+            createdAt: order.createdAt,
+            // Distance calculation to be implemented. sending null/undefined for now to avoid fake data
+            distance: null,
+            deliveryEarning: commissionData.data?.deliveryBoy?.amount || 0
+        };
     }));
 
     return res.status(200).json({
@@ -124,18 +135,23 @@ export const getPendingOrders = asyncHandler(async (req: Request, res: Response)
         .populate("items")
         .sort({ createdAt: -1 });
 
-    const formattedOrders = orders.map(order => ({
-        id: order._id,
-        orderId: order.orderNumber,
-        customerName: order.customerName,
-        customerPhone: order.customerPhone,
-        status: order.status,
-        address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
-        items: mapOrderItems(order.items), // Real items
-        totalAmount: order.total,
-        estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
-        createdAt: order.createdAt,
-        distance: null
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+        const commissionData = await calculateOrderCommissions(order._id as string);
+        return {
+            id: order._id,
+            orderId: order.orderNumber,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            status: order.status,
+            address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
+            items: mapOrderItems(order.items), // Real items
+            totalAmount: order.total,
+            paymentMethod: order.paymentMethod,
+            estimatedDeliveryTime: order.estimatedDeliveryDate ? new Date(order.estimatedDeliveryDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+            createdAt: order.createdAt,
+            distance: null,
+            deliveryEarning: commissionData.data?.deliveryBoy?.amount || 0
+        };
     }));
 
     return res.status(200).json({
@@ -156,6 +172,7 @@ export const getOrderDetails = asyncHandler(async (req: Request, res: Response) 
         return res.status(404).json({ success: false, message: "Order not found" });
     }
 
+    const commissionData = await calculateOrderCommissions(order._id as string);
     const formattedOrder = {
         id: order._id,
         orderId: order.orderNumber,
@@ -166,8 +183,10 @@ export const getOrderDetails = asyncHandler(async (req: Request, res: Response) 
         status: order.status,
         items: mapOrderItems(order.items), // Real populated items
         totalAmount: order.total,
+        paymentMethod: order.paymentMethod,
         createdAt: order.createdAt,
-        distance: null
+        distance: null,
+        deliveryEarning: commissionData.data?.deliveryBoy?.amount || 0
     };
 
     return res.status(200).json({
@@ -270,17 +289,22 @@ export const getReturnOrders = asyncHandler(async (req: Request, res: Response) 
         .populate("items")
         .sort({ updatedAt: -1 });
 
-    const formattedOrders = orders.map(order => ({
-        id: order._id,
-        orderId: order.orderNumber,
-        customerName: order.customerName,
-        customerPhone: order.customerPhone,
-        status: order.status,
-        address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
-        items: mapOrderItems(order.items),
-        totalAmount: order.total,
-        createdAt: order.createdAt,
-        distance: null
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+        const commissionData = await calculateOrderCommissions(order._id as string);
+        return {
+            id: order._id,
+            orderId: order.orderNumber,
+            customerName: order.customerName,
+            customerPhone: order.customerPhone,
+            status: order.status,
+            address: `${order.deliveryAddress?.address || ''}, ${order.deliveryAddress?.city || ''}`,
+            items: mapOrderItems(order.items),
+            totalAmount: order.total,
+            paymentMethod: order.paymentMethod,
+            createdAt: order.createdAt,
+            distance: null,
+            deliveryEarning: commissionData.data?.deliveryBoy?.amount || 0
+        };
     }));
 
     return res.status(200).json({

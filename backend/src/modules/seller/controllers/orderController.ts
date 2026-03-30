@@ -6,6 +6,7 @@ import Seller from "../../../models/Seller";
 import WalletTransaction from "../../../models/WalletTransaction";
 import { notifyDeliveryBoysOfNewOrder } from "../../../services/orderNotificationService";
 import { Server as SocketIOServer } from "socket.io";
+import { calculateOrderBreakdown } from "../../../services/commissionService";
 
 /**
  * Get seller's orders with filters, sorting, and pagination
@@ -86,18 +87,28 @@ export const getOrders = asyncHandler(
     const total = await Order.countDocuments(query);
 
     // Format response for frontend
-    const formattedOrders = orders.map(order => ({
-      id: order._id,
-      orderId: order.orderNumber,
-      deliveryDate: order.estimatedDeliveryDate
-        ? order.estimatedDeliveryDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
-        : order.orderDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
-      orderDate: order.orderDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
-      status: order.status === 'On the way' ? 'On the way' : order.status,
-      amount: order.total,
-      customerName: (order.customer as any)?.name || order.customerName || '',
-      customerPhone: (order.customer as any)?.phone || order.customerPhone || '',
-      deliveryBoyName: (order.deliveryBoy as any)?.name || '',
+    const formattedOrders = await Promise.all(orders.map(async (order) => {
+      let sellerEarning = order.total;
+      try {
+        const breakdown = await calculateOrderBreakdown(order._id.toString());
+        sellerEarning = breakdown.sellerEarnings.get(sellerId.toString()) || order.total;
+      } catch (err) {
+        console.error(`Error calculating earning for order ${order.orderNumber}:`, err);
+      }
+
+      return {
+        id: order._id,
+        orderId: order.orderNumber,
+        deliveryDate: order.estimatedDeliveryDate
+          ? order.estimatedDeliveryDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+          : order.orderDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        orderDate: order.orderDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }),
+        status: order.status === 'On the way' ? 'On the way' : order.status,
+        amount: sellerEarning, // This is now the seller's net earning
+        customerName: (order.customer as any)?.name || order.customerName || '',
+        customerPhone: (order.customer as any)?.phone || order.customerPhone || '',
+        deliveryBoyName: (order.deliveryBoy as any)?.name || '',
+      };
     }));
 
     return res.status(200).json({
@@ -201,6 +212,15 @@ export const getOrderById = asyncHandler(
       };
     });
 
+    // Calculate seller earning
+    let sellerEarning = order.total;
+    try {
+      const breakdown = await calculateOrderBreakdown(order._id.toString());
+      sellerEarning = breakdown.sellerEarnings.get(sellerId.toString()) || order.total;
+    } catch (err) {
+      console.error(`Error calculating earning for order ${order.orderNumber}:`, err);
+    }
+
     // Format order data for frontend
     const orderDetail = {
       id: order._id,
@@ -217,7 +237,8 @@ export const getOrderById = asyncHandler(
       items: formattedItems,
       subtotal: order.subtotal || 0,
       tax: order.tax || 0,
-      grandTotal: order.total || 0,
+      grandTotal: sellerEarning, // Show seller's net share as grand total
+      sellerEarning: sellerEarning,
       paymentMethod: order.paymentMethod || 'N/A',
       paymentStatus: order.paymentStatus || 'Pending',
       deliveryAddress: order.deliveryAddress || {},

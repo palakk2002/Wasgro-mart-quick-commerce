@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { bulkUploadProducts } from "../../../services/api/productService";
 import * as xlsx from "xlsx";
+import { getCategories } from "../../../services/api/categoryService";
 
 interface BulkUploadResult {
   total: number;
@@ -18,6 +19,21 @@ export default function SellerBulkUpload() {
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState<BulkUploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const response = await getCategories();
+        if (response.success) {
+          setCategories(response.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch categories for sample:", err);
+      }
+    };
+    fetchCats();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -37,24 +53,35 @@ export default function SellerBulkUpload() {
   };
 
   const downloadSample = () => {
+    // Get first few valid categories names for sample data
+    const catName1 = categories[0]?.name || "Oil";
+    const catName2 = categories[1]?.name || "Ice Cream";
+
     const sampleData = [
       {
-        name: "Eco-friendly Bamboo Toothbrush",
+        name: "Test Product 1",
         price: 199,
         stock: 50,
-        category: "Personal Care",
-        description: "Sustainable bamboo toothbrush with soft bristles.",
+        category: catName1,
+        description: "This is a test product description.",
       },
       {
-        name: "Organic Green Tea - 50 bags",
+        name: "Test Product 2",
         price: 450,
         stock: 100,
-        category: "Beverages",
-        description: "Pure organic green tea leaves from Darjeeling.",
+        category: catName2,
+        description: "This is another test product description.",
       },
     ];
 
     const worksheet = xlsx.utils.json_to_sheet(sampleData);
+
+    // Add a helper text row or sheet with valid categories
+    const validCats = categories.map(c => c.name).slice(0, 10).join(", ");
+    if (validCats) {
+      console.log("Valid categories for sample:", validCats);
+    }
+
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, "Products");
     xlsx.writeFile(workbook, "Wasgro_Bulk_Upload_Sample.xlsx");

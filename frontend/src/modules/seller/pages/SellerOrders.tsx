@@ -83,7 +83,7 @@ export default function SellerOrders() {
 
   const handleExport = () => {
     // Create CSV content
-    const headers = ['Order ID', 'Delivery Date', 'Order Date', 'Status', 'Amount'];
+    const headers = ['Order ID', 'Delivery Date', 'Order Date', 'Status', 'Your Earning'];
     const csvContent = [
       headers.join(','),
       ...orders.map(order =>
@@ -261,7 +261,7 @@ export default function SellerOrders() {
                     setCurrentPage(1);
                   }}
                   className="flex-1 w-full sm:w-auto px-3 py-2 border border-neutral-300 rounded text-xs sm:text-sm text-neutral-900 bg-white focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
-                  placeholder="Search by Order ID, Status, or Amount"
+                  placeholder="Search by Order ID, Status, or Earning"
                 />
               </div>
 
@@ -448,7 +448,7 @@ export default function SellerOrders() {
                         onClick={() => handleSort('amount')}
                         className="flex items-center gap-2 hover:text-neutral-900 transition-colors"
                       >
-                        Amount
+                        Your Earning
                         <svg
                           width="12"
                           height="12"

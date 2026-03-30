@@ -9,9 +9,12 @@ import { notifySellersOfOrderUpdate } from './sellerNotificationService';
 // Track order notification state
 export interface OrderNotificationState {
     orderId: string;
-    notifiedDeliveryBoys: Set<string>;
-    rejectedDeliveryBoys: Set<string>;
+    allNearbyDeliveryBoyIds: string[]; // Sorted by distance (all potential candidates)
+    currentIndex: number; // Current index in the allNearbyDeliveryBoyIds list
+    notifiedDeliveryBoys: Set<string>; // Those who are currently seeing the notification
+    rejectedDeliveryBoys: Set<string>; // Those who have explicitly rejected
     acceptedBy: string | null;
+    orderData: any; // Stored order data to re-emit to next delivery boy
 }
 
 export const notificationStates = new Map<string, OrderNotificationState>();
@@ -267,12 +270,16 @@ export async function findDeliveryBoysNearSellerLocations(
  * Emit new order notification to delivery boys near seller locations
  * Prioritizes delivery boys within the seller's service radius
  */
+/**
+ * Emit new order notification to the next available delivery boy in range (Cascading)
+ */
 export async function notifyDeliveryBoysOfNewOrder(
     io: SocketIOServer,
     order: any
 ): Promise<void> {
     try {
         // Find delivery boys near seller locations (within service radius)
+        // This function already returns them sorted by distance
         let nearbyDeliveryBoyIds = await findDeliveryBoysNearSellerLocations(order);
 
         if (nearbyDeliveryBoyIds.length === 0) {
@@ -281,30 +288,23 @@ export async function notifyDeliveryBoysOfNewOrder(
         }
 
         // --- FILTER BUSY DELIVERY BOYS ---
-        // Check if any of these delivery boys already have an active order
-        // Active = deliveryBoyStatus is Assigned, Picked Up, or In Transit
         const busyDeliveryBoys = await Order.find({
             deliveryBoy: { $in: nearbyDeliveryBoyIds },
             deliveryBoyStatus: { $in: ['Assigned', 'Picked Up', 'In Transit'] },
-            // Double check status to be sure we don't count completed/cancelled ones just in case statuses are out of sync
             status: { $nin: ['Delivered', 'Cancelled', 'Rejected', 'Returned'] }
         }).distinct('deliveryBoy');
 
         if (busyDeliveryBoys.length > 0) {
             const busyIdsSet = new Set(busyDeliveryBoys.map(id => id.toString()));
-
-            const originalCount = nearbyDeliveryBoyIds.length;
             nearbyDeliveryBoyIds = nearbyDeliveryBoyIds.filter(id => !busyIdsSet.has(id.toString()));
 
-            console.log(`ℹ️ Filtered out ${originalCount - nearbyDeliveryBoyIds.length} busy delivery boys. Active: ${nearbyDeliveryBoyIds.length}`);
-
             if (nearbyDeliveryBoyIds.length === 0) {
-                console.log('⚠️ All nearby delivery boys are currently busy with other orders.');
-                // Optionally: could emit to admin or retry later
+                console.log('⚠️ All nearby delivery boys are currently busy.');
                 return;
             }
         }
-        // ---------------------------------
+
+        const idStrings = nearbyDeliveryBoyIds.map(id => id.toString().trim());
 
         // Prepare order data for notification
         const orderData = {
@@ -324,45 +324,89 @@ export async function notifyDeliveryBoysOfNewOrder(
             createdAt: order.createdAt,
         };
 
-        // Initialize notification state
         const orderId = order._id.toString();
-        const notifiedIds = new Set<string>();
 
-        // Only add delivery boys who are actually connected to the notification room
-        for (const id of nearbyDeliveryBoyIds) {
-            const idString = id.toString().trim();
-            const roomName = `delivery-${idString}`;
-            const room = io.sockets.adapter.rooms.get(roomName);
-
-            if (room && room.size > 0) {
-                notifiedIds.add(idString);
-                io.to(roomName).emit('new-order', orderData);
-                console.log(`📤 Emitted new-order to connected delivery boy room: ${roomName}`);
-            } else {
-                console.log(`⏩ Skipping disconnected delivery boy: ${idString}`);
-            }
-        }
-
-        if (notifiedIds.size === 0) {
-            console.log('⚠️ No connected delivery boys found to notify');
-            // Don't emit to general room as it includes offline delivery boys
-            return;
-        }
-
-        notificationStates.set(orderId, {
+        // Initialize notification state with the full sorted list
+        const state: OrderNotificationState = {
             orderId,
-            notifiedDeliveryBoys: notifiedIds,
+            allNearbyDeliveryBoyIds: idStrings,
+            currentIndex: -1, // Will be incremented to 0 by notifyNextDeliveryBoy
+            notifiedDeliveryBoys: new Set(),
             rejectedDeliveryBoys: new Set(),
             acceptedBy: null,
-        });
+            orderData
+        };
 
-        // Only notify individual active delivery boys, not the general room
-        // This prevents offline delivery boys from receiving notifications
+        notificationStates.set(orderId, state);
 
-        console.log(`📢 Notified ${notifiedIds.size} connected delivery boys near seller locations about order ${order.orderNumber}`);
+        // Notify the first delivery boy
+        await notifyNextDeliveryBoy(io, orderId);
+
     } catch (error) {
         console.error('Error notifying delivery boys:', error);
     }
+}
+
+/**
+ * Notify the next available delivery boy in the queue for a specific order
+ */
+export async function notifyNextDeliveryBoy(
+    io: SocketIOServer,
+    orderId: string
+): Promise<boolean> {
+    const state = notificationStates.get(orderId);
+    if (!state || state.acceptedBy) return false;
+
+    state.currentIndex++;
+
+    // Check if we've exhausted all nearby delivery boys
+    if (state.currentIndex >= state.allNearbyDeliveryBoyIds.length) {
+        console.log(`⚠️ All ${state.allNearbyDeliveryBoyIds.length} delivery boys for order ${orderId} have been exhausted (disconnected or rejected).`);
+        
+        // Final fallback: Mark order as Rejected in DB
+        try {
+            const order = await Order.findById(orderId);
+            if (order && order.status !== 'Delivered' && !order.deliveryBoy) {
+                order.status = 'Rejected';
+                order.deliveryBoyStatus = 'Failed';
+                order.adminNotes = (order.adminNotes ? order.adminNotes + '\n' : '') +
+                    `[${new Date().toISOString()}] Rejected: No available/connected delivery partners responded.`;
+                await order.save();
+
+                io.to(`order-${orderId}`).emit('order-rejected', {
+                    orderId,
+                    message: 'No delivery partner available. Order rejected.',
+                });
+                
+                notifySellersOfOrderUpdate(io, order, 'STATUS_UPDATE');
+            }
+        } catch (err) {
+            console.error('Error finalizing order rejection:', err);
+        }
+
+        notificationStates.delete(orderId);
+        return false;
+    }
+
+    const nextDeliveryBoyId = state.allNearbyDeliveryBoyIds[state.currentIndex];
+    const roomName = `delivery-${nextDeliveryBoyId}`;
+    const room = io.sockets.adapter.rooms.get(roomName);
+
+    // If the delivery boy is not connected, move to the next one immediately
+    if (!room || room.size === 0) {
+        console.log(`⏩ Skipping disconnected delivery boy ${nextDeliveryBoyId}, moving to next...`);
+        return notifyNextDeliveryBoy(io, orderId);
+    }
+
+    // Clear previous notified set (only one notified at a time in sequential mode)
+    state.notifiedDeliveryBoys.clear();
+    state.notifiedDeliveryBoys.add(nextDeliveryBoyId);
+
+    // Emit the notification
+    io.to(roomName).emit('new-order', state.orderData);
+    console.log(`📤 [Sequential] Notified delivery boy ${nextDeliveryBoyId} (Index ${state.currentIndex}/${state.allNearbyDeliveryBoyIds.length}) about order ${state.orderData.orderNumber}`);
+
+    return true;
 }
 
 /**
@@ -481,62 +525,23 @@ export async function handleOrderRejection(
         // Check if this delivery boy was notified
         const normalizedDeliveryBoyId = String(deliveryBoyId).trim();
         if (!state.notifiedDeliveryBoys.has(normalizedDeliveryBoyId)) {
-            console.warn(`⚠️ Delivery boy ${normalizedDeliveryBoyId} not in notified list for order ${orderId}. Notified:`, Array.from(state.notifiedDeliveryBoys));
+            console.warn(`⚠️ Delivery boy ${normalizedDeliveryBoyId} not in notified list for order ${orderId}.`);
             return { success: false, message: 'You were not notified about this order', allRejected: false };
-        }
-
-        // Check if already rejected
-        if (state.rejectedDeliveryBoys.has(normalizedDeliveryBoyId)) {
-            return { success: true, message: 'You have already rejected this order', allRejected: false };
         }
 
         // Mark as rejected
         state.rejectedDeliveryBoys.add(normalizedDeliveryBoyId);
 
-        // Check if all delivery boys have rejected
-        const allRejected = state.rejectedDeliveryBoys.size === state.notifiedDeliveryBoys.size;
+        console.log(`🚫 Delivery boy ${deliveryBoyId} rejected order ${orderId}. Moving to next...`);
 
-        if (allRejected) {
-            // Update order in database to "Rejected"
-            try {
-                // Update order in database to "Rejected"
-                const order = await Order.findById(orderId);
-                if (order) {
-                    order.status = 'Rejected';
-                    order.deliveryBoyStatus = 'Failed';
-                    order.adminNotes = (order.adminNotes ? order.adminNotes + '\n' : '') +
-                        `[${new Date().toISOString()}] Rejected: All notified delivery boys (${state.notifiedDeliveryBoys.size}) rejected the order.`;
-                    await order.save();
+        // Cascade to next delivery boy
+        const notifiedNext = await notifyNextDeliveryBoy(io, orderId);
 
-                    // Notify customer via socket
-                    io.to(`order-${orderId}`).emit('order-rejected', {
-                        orderId,
-                        message: 'Unfortunately, no delivery partner is available at the moment. Your order has been rejected.',
-                    });
-
-                    // Notify sellers/restaurants
-                    notifySellersOfOrderUpdate(io, order, 'STATUS_UPDATE');
-
-                    console.log(`✅ All delivery boys rejected order ${orderId}. Order status updated to Rejected.`);
-                } else {
-                    console.error(`❌ Order ${orderId} not found when trying to update rejection status`);
-                }
-            } catch (dbError) {
-                console.error(`❌ Error updating order ${orderId} to Rejected status:`, dbError);
-                // We still proceed with cleanup to avoid memory leaks/stuck state
-            }
-
-            // Clean up notification state
-            notificationStates.delete(orderId);
-        } else {
-            // Emit rejection acknowledgment to the specific delivery boy
-            io.to(`delivery-${deliveryBoyId}`).emit('order-rejection-acknowledged', {
-                orderId,
-            });
-        }
-
-        console.log(`🚫 Delivery boy ${deliveryBoyId} rejected order ${orderId}`);
-        return { success: true, message: 'Order rejected', allRejected };
+        return { 
+            success: true, 
+            message: 'Order rejected', 
+            allRejected: !notifiedNext 
+        };
     } catch (error) {
         console.error('Error handling order rejection:', error);
         return { success: false, message: 'Error rejecting order', allRejected: false };

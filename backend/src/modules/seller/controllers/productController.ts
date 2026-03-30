@@ -692,7 +692,7 @@ export const bulkUpload = asyncHandler(async (req: Request, res: Response) => {
             categoryId = matchedCategory._id;
           }
         } else if (categoryInput) {
-          rowErrors.push(`Category/Subcategory '${categoryInput}' not found`);
+          rowErrors.push(`Category/Subcategory '${categoryInput}' not found. Use a valid name (e.g., 'Oil', 'Ice Cream') or a valid ID from the system.`);
         }
       }
 

@@ -6,6 +6,7 @@ import Product from "../../../models/Product";
 import OrderItem from "../../../models/OrderItem";
 import { asyncHandler } from "../../../utils/asyncHandler";
 import mongoose from "mongoose";
+import { calculateOrderBreakdown } from "../../../services/commissionService";
 
 /**
  * Get seller's dashboard statistics
@@ -72,11 +73,21 @@ export const getDashboardStats = asyncHandler(
             .sort({ createdAt: -1 })
             .limit(10);
 
-        const formattedNewOrders = newOrders.map(order => ({
-            id: order.orderNumber || order._id.toString(), // Use orderNumber if available
-            orderDate: new Date(order.orderDate).toLocaleDateString('en-GB'),
-            status: order.status === 'Out for Delivery' ? 'Out For Delivery' : order.status,
-            amount: order.total, // Use total instead of grandTotal (check Schema)
+        const formattedNewOrders = await Promise.all(newOrders.map(async (order) => {
+            let sellerEarning = order.total;
+            try {
+                const breakdown = await calculateOrderBreakdown(order._id.toString());
+                sellerEarning = breakdown.sellerEarnings.get(sellerId.toString()) || order.total;
+            } catch (err) {
+                console.error(`Error calculating earning for order ${order.orderNumber}:`, err);
+            }
+
+            return {
+                id: order.orderNumber || order._id.toString(), // Use orderNumber if available
+                orderDate: new Date(order.orderDate).toLocaleDateString('en-GB'),
+                status: order.status === 'Out for Delivery' ? 'Out For Delivery' : order.status,
+                amount: sellerEarning, // Use net earning instead of grand total
+            };
         }));
 
         // 4. Chart Data (Last 12 months)
