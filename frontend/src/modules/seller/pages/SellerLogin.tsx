@@ -10,7 +10,7 @@ import { useAuth } from "../../../context/AuthContext";
 export default function SellerLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("9111966732");
   const [showOTP, setShowOTP] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

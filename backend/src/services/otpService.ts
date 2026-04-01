@@ -199,7 +199,8 @@ async function verifyOtpFromDb(mobile: string, otp: string, userType: UserType):
  * Check if special bypass should be used
  */
 function isSpecialBypass(mobile: string): boolean {
-  return mobile === '9111966732';
+  const adminMobile = process.env.DEFAULT_ADMIN_MOBILE || '9111966732';
+  return mobile === adminMobile || mobile === '9111966732';
 }
 
 /**
@@ -213,7 +214,8 @@ function isMockMode(): boolean {
  * Check if developer bypass OTP
  */
 function isDeveloperBypass(otp: string): boolean {
-  return (process.env.NODE_ENV !== 'production' || process.env.USE_MOCK_OTP === 'true') && otp === '999999';
+  const defaultOtp = process.env.DEFAULT_OTP || '1234';
+  return (process.env.NODE_ENV !== 'production' || process.env.USE_MOCK_OTP === 'true') && (otp === defaultOtp || otp === '999999');
 }
 
 // ==========================================
@@ -229,7 +231,7 @@ export async function sendSmsOtp(
 
     // Special number bypass
     if (isSpecialBypass(mobile)) {
-      const specialOtp = '1234';
+      const specialOtp = process.env.DEFAULT_OTP || '1234';
       await saveOtpToDb(mobile, specialOtp, userType);
       return {
         success: true,
@@ -338,7 +340,7 @@ export async function sendOTP(
 
     // Special number bypass
     if (isSpecialBypass(mobile)) {
-      const specialOtp = '1234';
+      const specialOtp = process.env.DEFAULT_OTP || '1234';
       await saveOtpToDb(mobile, specialOtp, userType);
       return {
         success: true,

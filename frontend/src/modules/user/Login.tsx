@@ -10,7 +10,7 @@ import OTPInput from "../../components/OTPInput";
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [mobileNumber, setMobileNumber] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("9111966732");
   const [showOTP, setShowOTP] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [loading, setLoading] = useState(false);
