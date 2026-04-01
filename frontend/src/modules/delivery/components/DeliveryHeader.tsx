@@ -20,13 +20,13 @@ export default function DeliveryHeader({ userName }: DeliveryHeaderProps) {
       )}
 
       {/* Header Content */}
-      <div className="px-4 py-3">
+      <div className="px-4 py-1.5">
         {/* App Title */}
-        <div className="flex justify-center mb-3">
+        <div className="flex justify-center mb-1">
           <img
-            src="/assets/wasgromartfinal-removebg-preview.png"
+            src="/assets/wasgromart-black-text-removebg-preview.png"
             alt="Wasgro Mart"
-            className="h-10 w-auto object-contain"
+            className="h-14 sm:h-28 w-auto object-contain"
           />
         </div>
 

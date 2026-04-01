@@ -49,7 +49,7 @@ export default function AdminHeader({
 
   return (
     <header className="bg-white shadow-sm border-b border-neutral-200 sticky top-0 z-30">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-3 sm:px-4 md:px-6 py-3 sm:py-4 gap-3 sm:gap-0">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-3 sm:px-4 md:px-6 py-1 sm:py-2 gap-3 sm:gap-0">
         {/* Logo and Hamburger Menu */}
         <div className="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {/* Hamburger Menu Button */}
@@ -94,9 +94,9 @@ export default function AdminHeader({
             onClick={handleLogoClick}
             className="hover:opacity-80 transition-opacity">
             <img
-              src="/assets/wasgromartfinal-removebg-preview.png"
+              src="/assets/wasgromart-black-text-removebg-preview.png"
               alt="Wasgro mart"
-              className="h-8 sm:h-16 w-auto object-contain cursor-pointer my-0 sm:-my-2 relative z-50"
+              className="h-12 sm:h-24 w-auto object-contain cursor-pointer -my-4 sm:-my-8 relative z-50"
               style={{ maxWidth: "none" }}
             />
           </button>

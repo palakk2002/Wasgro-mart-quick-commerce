@@ -65,7 +65,7 @@ export default function SellerHeader({
 
   return (
     <header className="bg-white shadow-sm border-b border-neutral-200 sticky top-0 z-30">
-      <div className="flex flex-row items-center justify-between px-3 sm:px-4 md:px-6 py-2 sm:py-3">
+      <div className="flex flex-row items-center justify-between px-3 sm:px-4 md:px-6 py-1 sm:py-1.5">
         {/* Logo and Hamburger Menu */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Hamburger Menu Button - Desktop only */}
@@ -110,9 +110,9 @@ export default function SellerHeader({
             onClick={handleLogoClick}
             className="hover:opacity-80 transition-opacity">
             <img
-              src="/assets/wasgromartfinal-removebg-preview.png"
+              src="/assets/wasgromart-black-text-removebg-preview.png"
               alt="Wasgro mart"
-              className="h-9 sm:h-16 w-auto object-contain cursor-pointer -my-1 sm:-my-3 relative z-50"
+              className="h-14 sm:h-28 w-auto object-contain cursor-pointer -my-[20px] sm:-my-[40px] relative z-50"
               style={{ maxWidth: "none" }}
             />
           </button>
