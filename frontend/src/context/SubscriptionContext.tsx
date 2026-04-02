@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect, useRef } from "react";
+import { io, Socket } from "socket.io-client";
 
 // ── Types ──────────────────────────────────────────────────────────────
 export interface SubscriptionFeature {
@@ -41,6 +42,11 @@ export interface ChatMessage {
   timestamp: string;
 }
 
+export interface CommissionRates {
+  standard: number;
+  premium: number;
+}
+
 interface SubscriptionContextType {
   // Admin controls
   subscriptionEnabled: boolean;
@@ -57,6 +63,11 @@ interface SubscriptionContextType {
   // Chat System
   chatMessages: Record<string, ChatMessage[]>;
   sendChatMessage: (sellerId: string, text: string, isFromAdmin: boolean) => void;
+  joinChatRoom: (sellerId: string) => void;
+
+  // Commission System
+  commissionRates: CommissionRates;
+  updateCommissionRate: (type: "standard" | "premium", rate: number) => void;
 
   // Seller state
   currentSubscription: CurrentSubscription | null;
@@ -160,8 +171,10 @@ const SubscriptionContext = createContext<SubscriptionContextType | undefined>(u
 
 // Shared record ID for "current seller" so admin deactivation syncs back
 const CURRENT_SELLER_RECORD_ID = "rec_current_seller";
+const SOCKET_SERVER_URL = "http://localhost:5001";
 
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
+  const socketRef = useRef<Socket | null>(null);
   const [subscriptionEnabled, setSubscriptionEnabled] = useState(true);
   const [plans, setPlans] = useState<SubscriptionPlan[]>(defaultPlans);
   const [currentSubscription, setCurrentSubscription] = useState<CurrentSubscription | null>(null);
@@ -171,6 +184,41 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>(
     initialChatMessages
   );
+  const [commissionRates, setCommissionRates] = useState<CommissionRates>({
+    standard: 15, // Default 15%
+    premium: 5,   // Default 5%
+  });
+
+  // Initialize Socket Connection
+  useEffect(() => {
+    const socket = io(SOCKET_SERVER_URL);
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("Connected to Chat Server:", socket.id);
+    });
+
+    socket.on("receive_message", (data: { sellerId: string; message: ChatMessage }) => {
+      setChatMessages((prev) => {
+        const existingMessages = prev[data.sellerId] || [];
+        // Prevent duplicate messages if sender already added it locally
+        if (existingMessages.some(m => m.id === data.message.id)) return prev;
+        
+        return {
+          ...prev,
+          [data.sellerId]: [...existingMessages, data.message],
+        };
+      });
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from Chat Server");
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   const toggleSubscriptionSystem = useCallback(() => {
     setSubscriptionEnabled((prev) => !prev);
@@ -300,6 +348,11 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         }),
       };
 
+      // Emit to Socket
+      if (socketRef.current) {
+        socketRef.current.emit("send_message", { sellerId, message: newMessage });
+      }
+
       setChatMessages((prev) => ({
         ...prev,
         [sellerId]: [...(prev[sellerId] || []), newMessage],
@@ -308,8 +361,21 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const joinChatRoom = useCallback((sellerId: string) => {
+    if (socketRef.current) {
+      socketRef.current.emit("join_room", sellerId);
+    }
+  }, []);
+
   const isSubscribed =
     currentSubscription !== null && currentSubscription.status === "Active";
+
+  const updateCommissionRate = useCallback((type: "standard" | "premium", rate: number) => {
+    setCommissionRates((prev) => ({
+      ...prev,
+      [type]: rate,
+    }));
+  }, []);
 
   return (
     <SubscriptionContext.Provider
@@ -324,10 +390,13 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
         deactivateSellerSubscription,
         chatMessages,
         sendChatMessage,
+        joinChatRoom,
         currentSubscription,
         subscribeToPlan,
         cancelSubscription,
         isSubscribed,
+        commissionRates,
+        updateCommissionRate,
       }}>
       {children}
     </SubscriptionContext.Provider>

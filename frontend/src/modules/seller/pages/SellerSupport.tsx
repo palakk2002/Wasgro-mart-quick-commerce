@@ -3,8 +3,13 @@ import { useSubscription } from "../../../context/SubscriptionContext";
 import FeatureGate from "../../../components/subscription/FeatureGate";
 
 export default function SellerSupport() {
-  const { chatMessages, sendChatMessage, isSubscribed } = useSubscription();
+  const { chatMessages, sendChatMessage, isSubscribed, joinChatRoom } = useSubscription();
   const sellerId = "rec_current_seller";
+
+  useEffect(() => {
+    joinChatRoom(sellerId);
+  }, [joinChatRoom, sellerId]);
+
   const messages = chatMessages[sellerId] || [];
   
   const [input, setInput] = useState("");

@@ -8,11 +8,13 @@ import {
   getSellerWithdrawals,
   getSellerCommissions,
 } from '../../../services/api/sellerWalletService';
+import { useSubscription } from '../../../context/SubscriptionContext';
 
 type Tab = 'transactions' | 'withdrawals' | 'commissions';
 
 export default function SellerWallet() {
   const { showToast } = useToast();
+  const { isSubscribed, commissionRates } = useSubscription();
   const [activeTab, setActiveTab] = useState<Tab>('transactions');
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -263,7 +265,39 @@ export default function SellerWallet() {
 
           {/* Commissions Tab */}
           {activeTab === 'commissions' && (
-            <div className="space-y-3">
+            <div className="space-y-4">
+              {/* Current Applied Rate Info */}
+              <div className={`p-4 rounded-2xl border ${isSubscribed ? 'bg-teal-50 border-teal-100' : 'bg-amber-50 border-amber-100'} mb-2`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-[10px] font-black uppercase tracking-widest ${isSubscribed ? 'text-teal-600' : 'text-amber-600'}`}>
+                      {isSubscribed ? 'Premium Commission Rate Active' : 'Standard Commission Rate Applied'}
+                    </p>
+                    <p className="text-2xl font-black text-neutral-900 mt-1">
+                      {isSubscribed ? commissionRates.premium : commissionRates.standard}%
+                    </p>
+                  </div>
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isSubscribed ? 'bg-teal-600 text-white shadow-lg shadow-teal-600/30' : 'bg-amber-100 text-amber-600'}`}>
+                    {isSubscribed ? (
+                      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="16" x2="12" y2="12" />
+                        <line x1="12" y1="8" x2="12.01" y2="8" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                {isSubscribed ? (
+                  <p className="text-xs text-teal-700/70 mt-3 font-medium">You are currently saving on every sale with your premium subscription! 🎉</p>
+                ) : (
+                  <p className="text-xs text-amber-700/70 mt-3 font-medium">Upgrade to a subscription to reduce your commission rate and earn more!</p>
+                )}
+              </div>
+
               {commissions.commissions?.length === 0 ? (
                 <p className="text-center text-gray-500 py-8">No commissions yet</p>
               ) : (

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSubscription } from "../../../context/SubscriptionContext";
 
 export default function AdminSupportInbox() {
-  const { sellerSubscriptions, chatMessages, sendChatMessage } = useSubscription();
+  const { sellerSubscriptions, chatMessages, sendChatMessage, joinChatRoom } = useSubscription();
   const [selectedSellerId, setSelectedSellerId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -13,6 +13,12 @@ export default function AdminSupportInbox() {
       setSelectedSellerId(sellerSubscriptions[0].id);
     }
   }, [sellerSubscriptions, selectedSellerId]);
+
+  useEffect(() => {
+    if (selectedSellerId) {
+      joinChatRoom(selectedSellerId);
+    }
+  }, [selectedSellerId, joinChatRoom]);
 
   useEffect(() => {
     if (scrollRef.current) {

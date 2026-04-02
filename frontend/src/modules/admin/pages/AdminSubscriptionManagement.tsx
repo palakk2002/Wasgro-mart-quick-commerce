@@ -8,6 +8,8 @@ export default function AdminSubscriptionManagement() {
     updatePlanPrice,
     togglePlanActive,
     togglePlanFeature,
+    commissionRates,
+    updateCommissionRate,
   } = useSubscription();
 
   return (
@@ -23,6 +25,66 @@ export default function AdminSubscriptionManagement() {
       </div>
 
       <div className="px-4 sm:px-6 py-5 sm:py-6 space-y-6">
+        {/* Commission Configuration */}
+        <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23"></line>
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-neutral-800">
+                Commission Configuration
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Set global commission rates for different seller tiers
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Standard Commission */}
+            <div className="p-4 rounded-xl border border-neutral-100 bg-neutral-50/50">
+              <label className="block text-xs font-bold text-neutral-600 mb-2 uppercase tracking-wider">
+                Standard Commission (Non-Subscribed)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={commissionRates.standard}
+                  onChange={(e) => updateCommissionRate('standard', parseFloat(e.target.value) || 0)}
+                  className="w-full bg-white border border-neutral-300 rounded-lg px-3 py-2.5 text-sm font-bold focus:ring-2 focus:ring-teal-500 outline-none transition-all"
+                  min="0"
+                  max="100"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-neutral-400">%</span>
+              </div>
+              <p className="text-[10px] text-neutral-400 mt-2">Applied to all sellers without an active subscription plan.</p>
+            </div>
+
+            {/* Premium Commission */}
+            <div className="p-4 rounded-xl border border-teal-100 bg-teal-50/30">
+              <label className="block text-xs font-bold text-teal-700 mb-2 uppercase tracking-wider">
+                Premium Commission (Subscribed)
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={commissionRates.premium}
+                  onChange={(e) => updateCommissionRate('premium', parseFloat(e.target.value) || 0)}
+                  className="w-full bg-white border border-teal-200 rounded-lg px-3 py-2.5 text-sm font-bold text-teal-700 focus:ring-2 focus:ring-teal-500 outline-none transition-all"
+                  min="0"
+                  max="100"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-bold text-teal-400">%</span>
+              </div>
+              <p className="text-[10px] text-teal-600/70 mt-2 font-medium">Applied to sellers with any active subscription plan.</p>
+            </div>
+          </div>
+        </div>
+
         {/* Global Toggle */}
         <div className="bg-white rounded-xl border border-neutral-200 p-4 sm:p-5 shadow-sm">
           <div className="flex items-center justify-between">
